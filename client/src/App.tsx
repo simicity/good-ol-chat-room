@@ -1,6 +1,6 @@
-import ChatRoom from './components/ChatRoom'
+import ChatRoom from './components/ChatRoom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import './styles/App.css'
+import './styles/App.css';
 
 function App() {
   const theme = createTheme({
@@ -16,4 +16,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

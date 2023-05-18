@@ -1,4 +1,4 @@
-import { MessageData } from './../typeInterfaces';
+import { MessageData } from './../interfaces';
 import ChatMessage from './ChatMessage';
 import Box from '@mui/material/Box';
 

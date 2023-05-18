@@ -1,4 +1,4 @@
-import ChatRoomHeader from './ChatRoomHeader';
+import AppHeader from './AppHeader';
 import ChatRoomBody from './ChatRoomBody';
 import Stack from '@mui/material/Stack';
 
@@ -16,13 +16,9 @@ const style = {
 }
 
 function ChatRoom() {
-  const chatroom = {
-    roomName: "test room"
-  }
-
   return (
     <Stack direction="column" sx={style}>
-      <ChatRoomHeader chatRoom={chatroom} />
+      <AppHeader type={"inside-chatroom"} />
       <ChatRoomBody />
     </Stack>
   )
