@@ -5,7 +5,6 @@ import usersReducer from './users'
 import messagesReducer from './messages'
 import chatRoomReducer from './chatroom'
 import chatRoomsReducer from './chatrooms'
-import socketConnectionReducer from './socketIsConnected'
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +13,6 @@ export const store = configureStore({
     messages: messagesReducer,
     chatroom: chatRoomReducer,
     chatrooms: chatRoomsReducer,
-    socketIsConnected: socketConnectionReducer,
   }
 })
 

@@ -1,4 +1,4 @@
-import { MessageData } from './../interfaces';
+import { messageData } from './../interfaces';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
@@ -9,12 +9,12 @@ const style = {
   borderRadius: '10px',
 }
 
-function ChatMessage({ message }: { message: MessageData }) {
+function ChatMessage({ message }: { message: messageData }) {
 
   return (
     <Box sx={style}>
       <Typography variant="caption" component="p" sx={{ color: "#BA68C8" }}>
-        {message.sender}
+        {message.from}
       </Typography>
       <Typography variant="body2" component="p">
         {message.message}

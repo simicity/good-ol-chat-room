@@ -9,7 +9,7 @@ const io = new Server<
   SocketData
 >(httpServer, {
   cors: {
-    origin: "http://localhost:8080",
+    origin: "http://localhost:5173",
   },
 });
 
@@ -53,10 +53,12 @@ io.on("connection", (socket) => {
 
   // emit session details
   if(!socket.data.sessionID){
-    return new Error("invalid session");
+    socket.emit("error", "Iinvalid session ID");
+    return;
   }
   if(!socket.data.userID) {
-    return new Error("invalid user id");
+    socket.emit("error", "invalid user ID");
+    return;
   }
   socket.emit("session",
     socket.data.sessionID,
@@ -64,11 +66,21 @@ io.on("connection", (socket) => {
   );
 
   // join the chatroom
-  if(!socket.data.chatroomID) {
-    return new Error("invalid chatroom");
-  }
-  socket.join(socket.data.chatroomID);
+  socket.on("joinChatRoom", (chatroom) => {
+    if(!chatroom) {
+      socket.emit("error", "invalid chatroom");
+      return;
+    }
+    socket.data.chatroom = chatroom;
+    socket.join(chatroom);
 
+    // notify existing users
+    if(socket.data.username) {
+      io.to(socket.data.chatroom).emit("userConnected", socket.data.username);
+    }
+  });
+
+  /*
   // fetch existing users
   const users:sessionData[] = [];
   const messagesPerUser = new Map();
@@ -82,56 +94,53 @@ io.on("connection", (socket) => {
     }
   });
   sessionStore.findAllSessions().forEach((session: sessionData) => {
-    if(session.chatroomID && session.chatroomID === socket.data.chatroomID) {
+    if(session.chatroom && session.chatroom === socket.data.chatroom) {
       users.push({
         userID: session.userID,
-        username: session.username,
         connected: session.connected,
         messages: messagesPerUser.get(session.userID) || [],
       });  
     }
   });
-  socket.to(socket.data.chatroomID).emit("users", users);
-
-  // notify existing users
-  socket.to(socket.data.chatroomID).emit("userConnected", {
-    userID: socket.data.userID,
-    username: socket.data.username,
-    connected: true,
-    messages: [],
-  });
+  socket.to(socket.data.chatroom).emit("users", users);
+*/
 
   // forward the private message to the right recipient (and to other tabs of the sender)
-  socket.on("chatroomMessage", ({ content, to }) => {
-    if(!socket.data.userID) {
-      return new Error("invalid user id");
+  socket.on("chatroomMessage", (content) => {
+    if(!socket.data.username) {
+      socket.emit("error", "invalid user ID");
+      return;
     }
-    const message = {
-      content,
-      from: socket.data.userID,
-      to,
+    if(!socket.data.chatroom) {
+      socket.emit("error", "chatroom not assigned");
+      return;
+    }
+    const message: messageData = {
+      message: content,
+      from: socket.data.username,
+      to: socket.data.chatroom,
+      timestamp: new Date(),
     };
-    if(!socket.data.userID) {
-      return new Error("invalid user id");
-    }
-    socket.to(to).to(socket.data.userID).emit("chatroomMessage", message);
+    io.to(socket.data.chatroom).emit("chatroomMessage", message);
     messageStore.saveMessage(message);
   });
 
   // notify users upon disconnection
   socket.on("disconnect", async () => {
     if(!socket.data.userID) {
-      return new Error("invalid user id");
+      socket.emit("error", "Invalid user ID");
+      return;
     }
     const matchingSockets = await io.in(socket.data.userID).fetchSockets();
     const isDisconnected = matchingSockets.length === 0;
     if (isDisconnected) {
       // notify other users
-      socket.broadcast.emit("userDisconnected", socket.data.userID);
+      if(socket.data.chatroom) {
+        io.to(socket.data.chatroom).emit("userDisconnected", socket.data.userID);
+      }
       // update the connection status of the session
       sessionStore.saveSession(socket.data.sessionID, {
         userID: socket.data.userID,
-        username: socket.data.username,
         connected: false,
       });
     }

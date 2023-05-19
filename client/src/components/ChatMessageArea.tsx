@@ -1,15 +1,20 @@
-import { MessageData } from './../interfaces';
+import { messageData } from './../interfaces';
 import ChatMessage from './ChatMessage';
 import Box from '@mui/material/Box';
+import { useAppSelector } from '../slices/hooks';
 
-function ChatMessageArea({ messages }: { messages: MessageData[] }) {
+
+function ChatMessageArea() {
+  const messages = useAppSelector(state => state.messages);
 
   return (
     <Box sx={{ m:1 }}>
       {messages && messages.length > 0 && (
-        messages.map((message: MessageData) => (
-          <ChatMessage message={message} />
-        ))
+        messages.map((message: messageData, index: number) => {
+          return (
+            <ChatMessage key={index} message={message} />
+          );
+        })
       )}
     </Box>
   )

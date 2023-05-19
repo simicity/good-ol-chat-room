@@ -1,23 +1,26 @@
 import { UserData } from './../interfaces';
 import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 const initialState: UserData = {
   username: undefined,
+  isOnline: false,
 }
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<UserData>) => {
-      state.username = action.payload.username;
+    connectUser: (state, action: PayloadAction<string>) => {
+      state.username = action.payload;
+      state.isOnline = true;
     },
-    resetUser: (state) => {
+    disconnectUser: (state) => {
       state = initialState;
+      state.isOnline = false;
     },
   },
 });
 
-export const { setUser, resetUser } = userSlice.actions;
+export const { connectUser, disconnectUser } = userSlice.actions;
 export default userSlice.reducer;

@@ -1,16 +1,12 @@
-import { MessageData } from './../interfaces';
+import { messageData } from './../interfaces';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit'
 
 const messagesSlice = createSlice({
   name: 'messages',
-  initialState: [
-    {sender: "user1", message: "test message"}, 
-    {sender: "user2", message: "test message"},
-    {sender: "user3", message: "test message"},
-  ] as MessageData[],
+  initialState: [] as messageData[],
   reducers: {
-    addMessage: (state, action: PayloadAction<MessageData>) => {
+    addMessage: (state, action: PayloadAction<messageData>) => {
       state.push(action.payload)
     },
   },
