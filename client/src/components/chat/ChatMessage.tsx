@@ -1,4 +1,4 @@
-import { messageData } from './../interfaces';
+import { messageData } from '../../interfaces';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 

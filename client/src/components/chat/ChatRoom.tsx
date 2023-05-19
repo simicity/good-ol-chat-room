@@ -1,4 +1,4 @@
-import AppHeader from './AppHeader';
+import AppHeader from '../AppHeader';
 import ChatRoomBody from './ChatRoomBody';
 import Stack from '@mui/material/Stack';
 

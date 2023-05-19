@@ -1,8 +1,7 @@
-import { messageData } from './../interfaces';
+import { messageData } from '../../interfaces';
 import ChatMessage from './ChatMessage';
 import Box from '@mui/material/Box';
-import { useAppSelector } from '../slices/hooks';
-
+import { useAppSelector } from '../../slices/hooks';
 
 function ChatMessageArea() {
   const messages = useAppSelector(state => state.messages);

@@ -2,10 +2,10 @@ import Grid from '@mui/material/Grid';
 import InputBase from '@mui/material/InputBase';
 import Button from '@mui/material/Button';
 import { useState, useEffect } from 'react';
-import { useAppDispatch } from '../slices/hooks';
+import { useAppDispatch } from '../../slices/hooks';
 import { useNavigate } from 'react-router-dom';
-import socket from './../utils/socket';
-import { disconnectUser } from '../slices/user';
+import socket from '../../utils/socket';
+import { disconnectUser } from '../../slices/user';
 
 const gridContainerStyle = {
   backgroundColor: "#EDE7F6",
