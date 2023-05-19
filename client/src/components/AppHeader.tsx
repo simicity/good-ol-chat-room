@@ -4,9 +4,17 @@ import { useAppSelector } from '../slices/hooks';
 
 function AppHeader({ type }: { type: string }) {
   let title: string | undefined;
-  if(type === "select-chatroom") title = "Select Chat Room";
-  else if(type === "join-chatroom") title = "Joining " + useAppSelector(state => state.chatroom.name);
-  else if(type === "inside-chatroom") title = useAppSelector(state => state.chatroom.name);
+  switch(type) {
+    case "select-chatroom":
+      title = "Select Chat Room to Join";
+      break;
+    case "join-chatroom":
+      title = "Joining " + useAppSelector(state => state.chatroom.name);
+      break;
+    case "inside-chatroom":
+      title = useAppSelector(state => state.chatroom.name);
+      break;
+  }
 
   return (
     <Box sx={{ borderBottom: "1px solid #eee" }}>

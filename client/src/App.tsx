@@ -1,7 +1,8 @@
-import ChatRoom from './components/ChatRoom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import './styles/App.css';
+import ChatRoom from './components/chat/ChatRoom';
 import ChatRoomJoinForm from './components/ChatRoomJoinForm';
+import ChatRoomList from './components/entrance/ChatRoomList'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -11,6 +12,14 @@ import { useSocket } from './utils/socketHelper';
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <ChatRoomList />
+  },
+  {
+    path: "/room",
+    element: <ChatRoomList />
+  },
+  {
+    path: "/room/join/:id",
     element: <ChatRoomJoinForm />,
   },
   {

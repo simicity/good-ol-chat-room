@@ -5,9 +5,9 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 const chatRoomsSlice = createSlice({
   name: 'chatrooms',
   initialState: [
-    {name: "chat room 1"}, 
-    {name: "chat room 2"},
-    {name: "chat room 3"},
+    {name: "chat room 1", members: []}, 
+    {name: "chat room 2", members: []},
+    {name: "chat room 3", members: []},
   ] as ChatRoomData[],
   reducers: {
     addChatRoom: (state, action: PayloadAction<ChatRoomData>) => {

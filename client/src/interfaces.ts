@@ -6,7 +6,8 @@ export interface UserData {
 }
 
 export interface ChatRoomData {
-  name?: string;
+  name: string | undefined;
+  members: UserData[];
 }
 
 /** Shared types with server: Types for socket processing */

@@ -28,7 +28,7 @@ function ChatRoomJoinForm() {
     setButtonDisabled(event.target.value === "");
   };
   const navigate = useNavigate();
-  const chatroom = useAppSelector(state => state.chatroom.name);    
+  const chatroom = useAppSelector(state => state.chatroom.name);
   const dispatch = useAppDispatch();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -62,7 +62,7 @@ function ChatRoomJoinForm() {
             }}
           />
         <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center"}}>
-          {/* <Button onClick={() => {}}>Cancel</Button> */}
+          <Button onClick={() => navigate("/room")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>
         </Stack>
       </form>

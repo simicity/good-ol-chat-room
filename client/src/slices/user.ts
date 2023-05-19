@@ -17,7 +17,6 @@ const userSlice = createSlice({
     },
     disconnectUser: (state) => {
       state = initialState;
-      state.isOnline = false;
     },
   },
 });

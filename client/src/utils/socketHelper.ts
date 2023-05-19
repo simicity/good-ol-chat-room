@@ -47,7 +47,7 @@ const useSocket = () => {
       socket.off("connect_error", onDisconnect);
       socket.off('disconnect', onDisconnect);
     };
-  }, []);
+  }, [chatroom]);
 
 };
 
