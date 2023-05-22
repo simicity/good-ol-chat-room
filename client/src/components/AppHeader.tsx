@@ -1,6 +1,8 @@
-import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAppSelector } from '../slices/hooks';
+import { Link as RouterLink } from "react-router-dom";
+import Button from '@mui/material/Button';
 
 function AppHeader({ type }: { type: string }) {
   let title: string | undefined;
@@ -17,11 +19,16 @@ function AppHeader({ type }: { type: string }) {
   }
 
   return (
-    <Box sx={{ borderBottom: "1px solid #eee" }}>
+    <Stack direction="row" sx={{ justifyContent: "space-between", borderBottom: "1px solid #eee" }}>
       <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", m: 1, ml: 3 }}>
         {title}
       </Typography>
-    </Box>
+      {type === "inside-chatroom" && (
+        <Button component={RouterLink} to="/room" sx={{ mr: 3 }}>
+          Leave
+        </Button>      
+      )}
+    </Stack>
   );
 }
 

@@ -1,4 +1,4 @@
-import AppHeader from './AppHeader';
+import AppHeader from './../AppHeader';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
@@ -6,9 +6,11 @@ import InputBase from '@mui/material/InputBase';
 import FormHelperText from '@mui/material/FormHelperText';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../slices/hooks';
-import { onConnect } from '../utils/socketHelper';
-import { connectUser } from '../slices/user';
+import { useAppDispatch } from '../../slices/hooks';
+import { onConnect } from '../../utils/socketHelper';
+import { connectUser } from '../../slices/user';
+import { addChatRoom } from '../../slices/chatrooms';
+import { setRoom } from '../../slices/chatroom';
 
 const style = {
   position: 'absolute',
@@ -22,23 +24,30 @@ const style = {
   backgroundColor: 'white',
 }
 
-function ChatRoomJoinForm() {
-  const [isButtonDisabled, setButtonDisabled] = useState(true);
-  const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setButtonDisabled(event.target.value === "");
+function ChatRoomCreationForm() {
+  const [isChatRoomNameEmpty, setChatRoomNameEmpty] = useState(true);
+  const [isUsernameEmpty, setUsernameEmpty] = useState(true);
+  const handleChatRoomTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChatRoomNameEmpty(event.target.value === "");
   };
+  const handleUsernameTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUsernameEmpty(event.target.value === "");
+  };
+  const isButtonDisabled = isChatRoomNameEmpty || isUsernameEmpty;
   const navigate = useNavigate();
-  const chatroom = useAppSelector(state => state.chatroom.name);
   const dispatch = useAppDispatch();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const target = event.currentTarget;
+    const selectedChatRoom = target.chatroom.value;
     const selectedUsername = target.username.value;
-    if(selectedUsername && selectedUsername.length >= 3) {
+    if((selectedChatRoom && selectedChatRoom.length >= 3) && (selectedUsername && selectedUsername.length >= 3)) {
+      dispatch(addChatRoom(selectedChatRoom));
+      dispatch(setRoom(selectedChatRoom));
       onConnect(selectedUsername);
       dispatch(connectUser(selectedUsername));
-      navigate('/room/' + chatroom);
+      navigate('/room/' + selectedChatRoom);
     }
   };
 
@@ -47,12 +56,26 @@ function ChatRoomJoinForm() {
       <AppHeader type={"join-chatroom"} />
       <Box sx={{ p: 3 }}>  
       <form onSubmit={handleSubmit}>
+        <FormHelperText sx={{ color: "black", ml: 1 }}>Chat Room Name</FormHelperText>
+        <InputBase
+          id="chatroom"
+          placeholder="What's the room name?"
+          size="small"
+          onChange={handleChatRoomTextFieldChange}
+          sx={{ 
+            backgroundColor: "#EBEDEF",
+            borderRadius: "10px",
+            width: "100%",
+            mb: 3,
+            p: 1,
+            }}
+          />
         <FormHelperText sx={{ color: "black", ml: 1 }}>Username</FormHelperText>
         <InputBase
           id="username"
           placeholder="What's your username?"
           size="small"
-          onChange={handleTextFieldChange}
+          onChange={handleUsernameTextFieldChange}
           sx={{ 
             backgroundColor: "#EBEDEF",
             borderRadius: "10px",
@@ -71,4 +94,4 @@ function ChatRoomJoinForm() {
   );
 }
 
-export default ChatRoomJoinForm;
+export default ChatRoomCreationForm;

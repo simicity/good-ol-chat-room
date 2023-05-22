@@ -4,17 +4,13 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 const chatRoomsSlice = createSlice({
   name: 'chatrooms',
-  initialState: [
-    {name: "chat room 1", members: []}, 
-    {name: "chat room 2", members: []},
-    {name: "chat room 3", members: []},
-  ] as ChatRoomData[],
+  initialState: [] as ChatRoomData[],
   reducers: {
-    addChatRoom: (state, action: PayloadAction<ChatRoomData>) => {
-      state.push(action.payload)
+    addChatRoom: (state, action: PayloadAction<string>) => {
+      state.push({name: action.payload, members: []});
     },
-    removeChatRoom: (state, action: PayloadAction<ChatRoomData>) => {
-      state.filter((room: ChatRoomData) => room.name !== action.payload.name);
+    removeChatRoom: (state, action: PayloadAction<string>) => {
+      state.filter((room: ChatRoomData) => room.name !== action.payload);
     },
   },
 });

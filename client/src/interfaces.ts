@@ -6,7 +6,7 @@ export interface UserData {
 }
 
 export interface ChatRoomData {
-  name: string | undefined;
+  name?: string;
   members: UserData[];
 }
 
