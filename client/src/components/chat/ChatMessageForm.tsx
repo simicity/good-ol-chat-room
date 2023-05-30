@@ -1,11 +1,8 @@
 import Grid from '@mui/material/Grid';
 import InputBase from '@mui/material/InputBase';
 import Button from '@mui/material/Button';
-import { useState, useEffect } from 'react';
-import { useAppDispatch } from '../../slices/hooks';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import socket from '../../utils/socket';
-import { disconnectUser } from '../../slices/user';
 
 const gridContainerStyle = {
   backgroundColor: "#EDE7F6",
@@ -25,9 +22,6 @@ function ChatMessageForm() {
     setTextFieldValue(event.target.value);
   };
   
-  const navitage = useNavigate();
-  const dispatch = useAppDispatch();
-  
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const target = event.currentTarget;
@@ -38,26 +32,6 @@ function ChatMessageForm() {
     setTextFieldValue("");
   };
   const isButtonDisabled = textFieldValue === "";
-
-  useEffect(() => {
-    function onDisconnect() {
-      dispatch(disconnectUser());
-      navitage('/');
-    }
-
-    socket.on("connect_error", (err) => {
-      console.log("error: " + err);
-      onDisconnect();
-    });
-
-    socket.on('disconnect', onDisconnect);
-
-    return () => {
-      socket.off("connect_error", onDisconnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, []);
-
 
   return (
     <form onSubmit={handleSubmit}>

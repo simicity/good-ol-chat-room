@@ -6,11 +6,10 @@ import InputBase from '@mui/material/InputBase';
 import FormHelperText from '@mui/material/FormHelperText';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { useAppDispatch } from '../../slices/hooks';
-import { onConnect } from '../../utils/socketHelper';
-import { connectUser } from '../../slices/user';
-import { addChatRoom } from '../../slices/chatrooms';
+import { useAppDispatch, useAppSelector } from '../../slices/hooks';
+import { connect } from '../../utils/socketHelper';
 import { setRoom } from '../../slices/chatroom';
+import { connectUser } from '../../slices/user';
 
 const style = {
   position: 'absolute',
@@ -24,31 +23,70 @@ const style = {
   backgroundColor: 'white',
 }
 
+const validateEmailAddress = (email: string) => {
+  // Regex pattern for email validation
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailPattern.test(email);
+}
+
+const createChatRoom = async (chatroom: string, email: string) => {
+  const response = await fetch("http://localhost:3000/room", {
+      method: "POST",
+      mode: "cors",
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+          "name": chatroom,
+          "email": email,
+      }),
+  });
+  if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+  }
+}
+
 function ChatRoomCreationForm() {
-  const [isChatRoomNameEmpty, setChatRoomNameEmpty] = useState(true);
-  const [isUsernameEmpty, setUsernameEmpty] = useState(true);
+  const [chatRoomName, setChatRoomName] = useState("");
+  const [isChatRoomNameTaken, setChatRoomNameTaken] = useState(false);
+  const [emailAddress, setEmailAddress] = useState("");
+  const [isInvalidEmailAddress, setInvalidEmailAddress] = useState(false);
+  const [username, setUsername] = useState("");
+  // const [isUsernameTaken, setUsernameTaken] = useState(false);
+  const chatrooms = useAppSelector(state => state.chatrooms);
+
   const handleChatRoomTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChatRoomNameEmpty(event.target.value === "");
+    const selectedChatroomName = event.target.value;
+    setChatRoomName(selectedChatroomName);
+    setChatRoomNameTaken(false);
+    chatrooms.chatrooms.map((chatroom) => {
+      if(chatroom === selectedChatroomName) {
+        setChatRoomNameTaken(true);
+      }
+    });
   };
+
+  const handleEmailTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedEmailAddress = event.target.value;
+    setEmailAddress(selectedEmailAddress);
+    setInvalidEmailAddress(!validateEmailAddress(selectedEmailAddress));
+  };
+
   const handleUsernameTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsernameEmpty(event.target.value === "");
+    setUsername(event.target.value);
   };
-  const isButtonDisabled = isChatRoomNameEmpty || isUsernameEmpty;
+
+  const isButtonDisabled = chatRoomName === "" || username === "" || isChatRoomNameTaken;
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const target = event.currentTarget;
-    const selectedChatRoom = target.chatroom.value;
-    const selectedUsername = target.username.value;
-    if((selectedChatRoom && selectedChatRoom.length >= 3) && (selectedUsername && selectedUsername.length >= 3)) {
-      dispatch(addChatRoom(selectedChatRoom));
-      dispatch(setRoom(selectedChatRoom));
-      onConnect(selectedUsername);
-      dispatch(connectUser(selectedUsername));
-      navigate('/room/' + selectedChatRoom);
-    }
+    createChatRoom(chatRoomName, emailAddress);
+    connect(username);
+    dispatch(connectUser(username));
+    dispatch(setRoom(chatRoomName));
+    navigate('/room/' + chatRoomName);
   };
 
   return (
@@ -61,20 +99,41 @@ function ChatRoomCreationForm() {
           id="chatroom"
           placeholder="What's the room name?"
           size="small"
+          value={chatRoomName}
           onChange={handleChatRoomTextFieldChange}
           sx={{ 
             backgroundColor: "#EBEDEF",
             borderRadius: "10px",
             width: "100%",
-            mb: 3,
             p: 1,
             }}
           />
-        <FormHelperText sx={{ color: "black", ml: 1 }}>Username</FormHelperText>
+        {isChatRoomNameTaken && (
+          <FormHelperText sx={{ color: "red", ml: 1 }}>The chat room name is already taken.</FormHelperText>
+        )}
+        <FormHelperText sx={{ color: "black", ml: 1 }}>Email</FormHelperText>
+        <InputBase
+          id="email"
+          placeholder="What's your email?"
+          size="small"
+          value={emailAddress}
+          onChange={handleEmailTextFieldChange}
+          sx={{ 
+            backgroundColor: "#EBEDEF",
+            borderRadius: "10px",
+            width: "100%",
+            p: 1,
+            }}
+          />
+        {isInvalidEmailAddress && (
+          <FormHelperText sx={{ color: "red", ml: 1 }}>Please enter a valid email address.</FormHelperText>
+        )}
+        <FormHelperText sx={{ color: "black", ml: 1, mt: 3 }}>Username</FormHelperText>
         <InputBase
           id="username"
           placeholder="What's your username?"
           size="small"
+          value={username}
           onChange={handleUsernameTextFieldChange}
           sx={{ 
             backgroundColor: "#EBEDEF",

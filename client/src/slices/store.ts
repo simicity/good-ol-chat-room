@@ -4,7 +4,7 @@ import userReducer from './user'
 import usersReducer from './users'
 import messagesReducer from './messages'
 import chatRoomReducer from './chatroom'
-import chatRoomsReducer from './chatrooms'
+import chatRoomsReducer, { fetchChatRooms } from './chatrooms'
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +15,8 @@ export const store = configureStore({
     chatrooms: chatRoomsReducer,
   }
 })
+
+store.dispatch(fetchChatRooms());
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

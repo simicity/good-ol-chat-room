@@ -1,16 +1,15 @@
-import { UserData } from './../interfaces';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit'
 
 const usersSlice = createSlice({
   name: 'users',
-  initialState: [] as UserData[],
+  initialState: [] as string[],
   reducers: {
-    addUser: (state, action: PayloadAction<UserData>) => {
+    addUser: (state, action: PayloadAction<string>) => {
       state.push(action.payload)
     },
-    removeUser: (state, action: PayloadAction<UserData>) => {
-      state.filter((user: UserData) => user.username !== action.payload.username);
+    removeUser: (state, action: PayloadAction<string>) => {
+      state.filter(user => user !== action.payload);
     },
   },
 });

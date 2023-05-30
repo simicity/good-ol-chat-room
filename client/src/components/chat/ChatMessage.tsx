@@ -9,11 +9,34 @@ const style = {
   borderRadius: '10px',
 }
 
+const colorPerUserCache = new Map<string, string>();
+
+export const resetColorPerUserCache = () => {
+  colorPerUserCache.clear();
+};
+
+const generateRandomColor = (username: string) => {
+  if(colorPerUserCache.has(username)) {
+    return colorPerUserCache.get(username);
+  }
+
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * 16);
+    color += letters[randomIndex];
+  }
+
+  colorPerUserCache.set(username, color);
+  return color;
+}
+
 function ChatMessage({ message }: { message: messageData }) {
 
   return (
     <Box sx={style}>
-      <Typography variant="caption" component="p" sx={{ color: "#BA68C8" }}>
+      <Typography variant="caption" component="p" sx={{ color: generateRandomColor(message.from), fontWeight: "bold" }}>
         {message.from}
       </Typography>
       <Typography variant="body2" component="p">

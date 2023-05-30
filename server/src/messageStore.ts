@@ -1,8 +1,10 @@
 import { messageData } from './interfaces';
 
+const CACHE_SIZE = 1000;
+
 /* abstract */ class MessageStore {
   saveMessage(message: messageData) {}
-  findMessagesForUser(userID: string) {}
+  findMessagesForChatRoom(chatroom: string) {}
 }
 
 class InMemoryMessageStore extends MessageStore {
@@ -14,13 +16,14 @@ class InMemoryMessageStore extends MessageStore {
   }
 
   saveMessage(message: messageData) {
+    if(this.messages && this.messages.length > CACHE_SIZE) {
+      this.messages.shift()
+    }
     this.messages.push(message);
   }
 
-  findMessagesForUser(userID: string) {
-    return this.messages.filter(
-      ({ from, to }: {from: string, to: string}) => from === userID || to === userID
-    );
+  findMessagesForChatRoom(chatroom: string) {
+    return this.messages.filter(message => message.to === chatroom);
   }
 }
 

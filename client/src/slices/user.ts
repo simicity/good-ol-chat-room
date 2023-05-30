@@ -3,8 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 const initialState: UserData = {
+  userID: undefined,
   username: undefined,
-  isOnline: false,
+  isConnected: false,
 }
 
 const userSlice = createSlice({
@@ -13,10 +14,10 @@ const userSlice = createSlice({
   reducers: {
     connectUser: (state, action: PayloadAction<string>) => {
       state.username = action.payload;
-      state.isOnline = true;
+      state.isConnected = true;
     },
-    disconnectUser: (state) => {
-      state = initialState;
+    disconnectUser: () => {
+      return initialState;
     },
   },
 });

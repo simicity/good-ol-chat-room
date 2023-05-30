@@ -1,17 +1,28 @@
+const express = require('express');
+const cors = require("cors");
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
 import { Server } from 'socket.io';
-import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, sessionData, messageData } from './interfaces';
+import db from './db/db';
 
-const httpServer = require("http").createServer();
+import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, messageData, sessionData } from './interfaces';
+
 const io = new Server<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,
   SocketData
->(httpServer, {
+>(server, {
   cors: {
     origin: "http://localhost:5173",
   },
 });
+
+app.use(cors());
+app.use(express.json());
+
+import { Response, Request } from 'express';
 
 const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
@@ -24,18 +35,18 @@ const messageStore = new InMemoryMessageStore();
 
 io.use((socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
+  const username = socket.handshake.auth.username;
+  if (!username) {
+    return next(new Error("invalid username"));
+  }
   if (sessionID) {
     const session = sessionStore.findSession(sessionID);
     if (session) {
       socket.data.sessionID = sessionID;
       socket.data.userID = session.userID;
-      socket.data.username = session.username;
+      socket.data.username = username;
       return next();
     }
-  }
-  const username = socket.handshake.auth.username;
-  if (!username) {
-    return next(new Error("invalid username"));
   }
   socket.data.sessionID = randomId();
   socket.data.userID = randomId();
@@ -47,7 +58,6 @@ io.on("connection", (socket) => {
   // persist session
   sessionStore.saveSession(socket.data.sessionID, {
     userID: socket.data.userID,
-    username: socket.data.username,
     connected: true,
   });
 
@@ -75,40 +85,35 @@ io.on("connection", (socket) => {
     socket.join(chatroom);
 
     // notify existing users
-    if(socket.data.username) {
-      io.to(socket.data.chatroom).emit("userConnected", socket.data.username);
+    if(socket.data.userID && socket.data.username) {
+      const message: messageData = {
+        message: socket.data.username + " joined.",
+        from: "",
+        to: socket.data.chatroom,
+        timestamp: new Date(),
+      };
+      socket.to(socket.data.userID).emit("chatroomCachedMessages", messageStore.findMessagesForChatRoom(socket.data.chatroom));
+      io.to(socket.data.chatroom).emit("userJoined", message);
     }
   });
 
-  /*
   // fetch existing users
-  const users:sessionData[] = [];
-  const messagesPerUser = new Map();
-  messageStore.findMessagesForUser(socket.data.userID).forEach((message: {from: string, to: string}) => {
-    const { from, to } = message;
-    const otherUser = socket.data.userID === from ? to : from;
-    if (messagesPerUser.has(otherUser)) {
-      messagesPerUser.get(otherUser).push(message);
-    } else {
-      messagesPerUser.set(otherUser, [message]);
-    }
-  });
-  sessionStore.findAllSessions().forEach((session: sessionData) => {
-    if(session.chatroom && session.chatroom === socket.data.chatroom) {
-      users.push({
-        userID: session.userID,
-        connected: session.connected,
-        messages: messagesPerUser.get(session.userID) || [],
-      });  
-    }
-  });
-  socket.to(socket.data.chatroom).emit("users", users);
-*/
+  // const users: string[] = [];
+  // sessionStore.findAllSessions().forEach((session: sessionData) => {
+  //   if(session.chatroom && session.chatroom === socket.data.chatroom && session.connected) {
+  //     users.push(session.username);  
+  //   }
+  // });
+  // socket.emit("users", users);
 
   // forward the private message to the right recipient (and to other tabs of the sender)
   socket.on("chatroomMessage", (content) => {
-    if(!socket.data.username) {
+    if(!socket.data.userID) {
       socket.emit("error", "invalid user ID");
+      return;
+    }
+    if(!socket.data.username) {
+      socket.emit("error", "invalid username");
       return;
     }
     if(!socket.data.chatroom) {
@@ -134,9 +139,15 @@ io.on("connection", (socket) => {
     const matchingSockets = await io.in(socket.data.userID).fetchSockets();
     const isDisconnected = matchingSockets.length === 0;
     if (isDisconnected) {
-      // notify other users
-      if(socket.data.chatroom) {
-        io.to(socket.data.chatroom).emit("userDisconnected", socket.data.userID);
+      // notify existing users
+      if(socket.data.chatroom && socket.data.username) {
+        const message: messageData = {
+          message: socket.data.username + " left.",
+          from: "",
+          to: socket.data.chatroom,
+          timestamp: new Date(),
+        };
+        io.to(socket.data.chatroom).emit("userLeft", message);
       }
       // update the connection status of the session
       sessionStore.saveSession(socket.data.sessionID, {
@@ -147,8 +158,41 @@ io.on("connection", (socket) => {
   });
 });
 
+app.get("/rooms", (req: Request, res: Response) => {
+  db.all(`SELECT chatroom FROM chatrooms`, [], (err, rows) => {
+    if (err) {
+      res.status(400).json({"error": err.message});
+      return;
+    }
+    res.status(200).json(rows);
+  });
+});
+
+app.post("/room", (req: Request, res: Response) => {
+  db.run(`INSERT INTO chatrooms (chatroom, email) VALUES (?,?)`,
+    [req.body.name, req.body.email],
+    (err) => {
+      if (err) {
+        res.status(400).json({ "error": err.message });
+        return;
+      }
+      res.status(201).end();
+    });
+});
+
+app.delete("/room/delete/:chatroom", (req: Request, res: Response) => {
+  db.run(`DELETE FROM chatrooms WHERE chatroom = ?`, [req.params.chatroom],
+    (err) => {
+      if (err) {
+        res.status(400).json({ "error": err.message });
+        return;
+      }
+      res.status(200).end();
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 
-httpServer.listen(PORT, () =>
+server.listen(PORT, () =>
   console.log(`server listening at http://localhost:${PORT}`)
 );

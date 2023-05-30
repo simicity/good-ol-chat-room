@@ -1,17 +1,21 @@
 import { useEffect } from "react";
 import socket from './socket';
 import { useAppDispatch, useAppSelector } from '../slices/hooks';
-import { disconnectUser } from '../slices/user';
 import { addMessage } from '../slices/messages';
+import { disconnectUser } from "../slices/user";
 
-const onConnect = (username: string) => {
+const connect = (username: string) => {
   socket.auth = { username: username };
   socket.connect();
 };
 
+const disconnect = () => {
+  socket.disconnect();
+}
+
 const useSocket = () => {
   const dispatch = useAppDispatch();
-  const chatroom = useAppSelector(state => state.chatroom.name);
+  const chatroom = useAppSelector(state => state.chatroom);
 
   useEffect(() => {
     function onDisconnect() {
@@ -19,18 +23,28 @@ const useSocket = () => {
     }
 
     socket.on("connect", () => {
-      if(chatroom) {
-        socket.emit("joinChatRoom", chatroom);
+      if(!chatroom) {
+        console.log("errror: No chatroom assigned");
+        onDisconnect();
+        return;
       }
+      socket.emit("joinChatRoom", chatroom);
     })
 
-    socket.on("chatroomMessage", (newMessage) => {
-      console.log(newMessage.message);
-      dispatch(addMessage(newMessage));
+    socket.on("chatroomCachedMessages", (messages) => {
+      messages.forEach(message => dispatch(addMessage(message)));
     });
 
-    socket.on("userConnected", (username) => {
-      console.log("joined: " + username);
+    socket.on("chatroomMessage", (message) => {
+      dispatch(addMessage(message));
+    });
+
+    socket.on("userJoined", (message) => {
+      dispatch(addMessage(message));
+    });
+
+    socket.on("userLeft", (message) => {
+      dispatch(addMessage(message));
     });
 
     socket.on("connect_error", (err) => {
@@ -42,7 +56,9 @@ const useSocket = () => {
 
     return () => {
       socket.off('connect');
-      socket.off('userConnected');
+      socket.off('userJoined');
+      socket.off('userLeft');
+      socket.off('chatroomCachedMessages');
       socket.off('chatroomMessage');
       socket.off("connect_error", onDisconnect);
       socket.off('disconnect', onDisconnect);
@@ -52,6 +68,7 @@ const useSocket = () => {
 };
 
 export {
-  onConnect,
+  connect,
   useSocket,
+  disconnect,
 };

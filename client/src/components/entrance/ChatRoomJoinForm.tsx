@@ -7,7 +7,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../slices/hooks';
-import { onConnect } from '../../utils/socketHelper';
+import { connect } from '../../utils/socketHelper';
 import { connectUser } from '../../slices/user';
 
 const style = {
@@ -28,17 +28,17 @@ function ChatRoomJoinForm() {
     setButtonDisabled(event.target.value === "");
   };
   const navigate = useNavigate();
-  const chatroom = useAppSelector(state => state.chatroom.name);
+  const selectedChatRoom = useAppSelector(state => state.chatroom);
   const dispatch = useAppDispatch();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const target = event.currentTarget;
     const selectedUsername = target.username.value;
-    if(selectedUsername && selectedUsername.length >= 3) {
-      onConnect(selectedUsername);
+    if(selectedChatRoom && selectedUsername && selectedUsername.length >= 3) {
+      connect(selectedUsername);
       dispatch(connectUser(selectedUsername));
-      navigate('/room/' + chatroom);
+      navigate('/room/' + selectedChatRoom);
     }
   };
 

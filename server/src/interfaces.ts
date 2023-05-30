@@ -1,8 +1,8 @@
 export interface ServerToClientEvents {
   session: (sessionID: string, userID: string) => void;
-  users: (users: sessionData[]) => void;
-  userConnected: (username: string) => void;
-  userDisconnected: (userID: string) => void;
+  chatroomCachedMessages: (message: messageData[]) => void;
+  userJoined: (message: messageData) => void;
+  userLeft: (message: messageData) => void;
   chatroomMessage: (message: messageData) => void;
   error: (errorMessage: string) => void;
 }
@@ -27,7 +27,6 @@ export interface sessionData {
   userID: string;
   connected: boolean;
   chatroom?: string;
-  messages?: string[];
 }
 
 export interface messageData {
