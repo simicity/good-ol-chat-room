@@ -6,9 +6,15 @@ export const fetchChatRooms = createAsyncThunk('chatrooms/fetchChatRooms', async
   return response.data;
 });
 
+interface chatRoomsData {
+  chatrooms: string[],
+  isLoading: boolean,
+  error: string | null,
+}
+
 const chatRoomsSlice = createSlice({
   name: 'chatrooms',
-  initialState: { chatrooms: [], isLoading: false, error: null } as { chatrooms: string[], isLoading: boolean, error: string | null },
+  initialState: { chatrooms: [], isLoading: false, error: null } as chatRoomsData,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchChatRooms.pending, (state) => {

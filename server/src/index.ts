@@ -55,12 +55,6 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  // persist session
-  sessionStore.saveSession(socket.data.sessionID, {
-    userID: socket.data.userID,
-    connected: true,
-  });
-
   // emit session details
   if(!socket.data.sessionID){
     socket.emit("error", "Iinvalid session ID");
@@ -81,8 +75,17 @@ io.on("connection", (socket) => {
       socket.emit("error", "invalid chatroom");
       return;
     }
+
     socket.data.chatroom = chatroom;
     socket.join(chatroom);
+
+    // persist session
+    sessionStore.saveSession(socket.data.sessionID, {
+      userID: socket.data.userID,
+      username: socket.data.username,
+      connected: true,
+      chatroom: socket.data.chatroom,
+    });
 
     // notify existing users
     if(socket.data.userID && socket.data.username) {
@@ -96,15 +99,6 @@ io.on("connection", (socket) => {
       io.to(socket.data.chatroom).emit("userJoined", message);
     }
   });
-
-  // fetch existing users
-  // const users: string[] = [];
-  // sessionStore.findAllSessions().forEach((session: sessionData) => {
-  //   if(session.chatroom && session.chatroom === socket.data.chatroom && session.connected) {
-  //     users.push(session.username);  
-  //   }
-  // });
-  // socket.emit("users", users);
 
   // forward the private message to the right recipient (and to other tabs of the sender)
   socket.on("chatroomMessage", (content) => {
@@ -152,10 +146,31 @@ io.on("connection", (socket) => {
       // update the connection status of the session
       sessionStore.saveSession(socket.data.sessionID, {
         userID: socket.data.userID,
+        username: socket.data.username,
         connected: false,
+        chatroom: undefined,
       });
     }
   });
+});
+
+app.get("/users", (req: Request, res: Response) => {
+  // fetch existing users
+  const usersPerRoom = new Map<string, string[]>;
+  sessionStore.findAllSessions().forEach((session: sessionData) => {
+    if(session.connected && session.chatroom) {
+      if(usersPerRoom.has(session.chatroom)) {
+        usersPerRoom.get(session.chatroom)?.push(session.username);
+      } else {
+        usersPerRoom.set(session.chatroom, [session.username]); 
+      }
+    }
+  });
+  const arr = Array.from(usersPerRoom, ([key, value]) => ({
+    chatroom: key,
+    users: value,
+  }));
+  res.status(200).json(arr);
 });
 
 app.get("/rooms", (req: Request, res: Response) => {

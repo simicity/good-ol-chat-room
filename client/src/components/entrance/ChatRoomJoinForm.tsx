@@ -23,23 +23,31 @@ const style = {
 }
 
 function ChatRoomJoinForm() {
-  const [isButtonDisabled, setButtonDisabled] = useState(true);
-  const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setButtonDisabled(event.target.value === "");
-  };
   const navigate = useNavigate();
-  const selectedChatRoom = useAppSelector(state => state.chatroom);
   const dispatch = useAppDispatch();
+  const [username, setUsername] = useState("");
+  const [isUsernameTaken, setUsernameTaken] = useState(false);
+  const usersPerRoom = useAppSelector(state => state.users);
+  const chatroom = useAppSelector(state => state.chatroom);
+
+  const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedUsername = event.target.value;
+    setUsername(selectedUsername);
+    setUsernameTaken(false);
+    usersPerRoom.forEach(data => {
+      if(data.chatroom == chatroom) {
+        setUsernameTaken(data.users.includes(selectedUsername));
+      }
+    })
+  };
+
+  const isButtonDisabled = username === "" || isUsernameTaken;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const target = event.currentTarget;
-    const selectedUsername = target.username.value;
-    if(selectedChatRoom && selectedUsername && selectedUsername.length >= 3) {
-      connect(selectedUsername);
-      dispatch(connectUser(selectedUsername));
-      navigate('/room/' + selectedChatRoom);
-    }
+    connect(username);
+    dispatch(connectUser(username));
+    navigate('/room/' + chatroom);
   };
 
   return (
@@ -52,16 +60,19 @@ function ChatRoomJoinForm() {
           id="username"
           placeholder="What's your username?"
           size="small"
+          value={username}
           onChange={handleTextFieldChange}
           sx={{ 
             backgroundColor: "#EBEDEF",
             borderRadius: "10px",
             width: "100%",
-            mb: 3,
             p: 1,
             }}
           />
-        <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center"}}>
+        {isUsernameTaken && (
+          <FormHelperText sx={{ color: "red", ml: 1 }}>The chat room name is already taken.</FormHelperText>
+        )}
+        <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center", mt: 3}}>
           <Button onClick={() => navigate("/room")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>
         </Stack>

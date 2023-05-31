@@ -1,6 +1,6 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useAppDispatch, useAppSelector } from '../slices/hooks';
+import { useAppSelector } from '../slices/hooks';
 import { Link as RouterLink } from "react-router-dom";
 import Button from '@mui/material/Button';
 import { disconnect } from '../utils/socketHelper';
@@ -8,7 +8,6 @@ import { resetColorPerUserCache } from './chat/ChatMessage';
 
 function AppHeader({ type }: { type: string }) {
   const chatroom = useAppSelector(state => state.chatroom);
-  const user = useAppSelector(state => state.user);  
 
   let title: string | undefined;
   switch(type) {

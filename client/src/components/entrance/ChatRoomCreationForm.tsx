@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../slices/hooks';
 import { connect } from '../../utils/socketHelper';
 import { setRoom } from '../../slices/chatroom';
 import { connectUser } from '../../slices/user';
+import axios from 'axios';
 
 const style = {
   position: 'absolute',
@@ -30,55 +31,50 @@ const validateEmailAddress = (email: string) => {
 }
 
 const createChatRoom = async (chatroom: string, email: string) => {
-  const response = await fetch("http://localhost:3000/room", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-          "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-          "name": chatroom,
-          "email": email,
-      }),
+  await axios.post('http://localhost:3000/room', {
+      "name": chatroom,
+      "email": email,
+  }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .catch((error) => {
+    throw new Error(`HTTP error: ${error}`);
   });
-  if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-  }
+  
 }
 
 function ChatRoomCreationForm() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [chatRoomName, setChatRoomName] = useState("");
   const [isChatRoomNameTaken, setChatRoomNameTaken] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
   const [isInvalidEmailAddress, setInvalidEmailAddress] = useState(false);
   const [username, setUsername] = useState("");
-  // const [isUsernameTaken, setUsernameTaken] = useState(false);
   const chatrooms = useAppSelector(state => state.chatrooms);
 
   const handleChatRoomTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // const selectedChatroomName = event.target.value;
     const selectedChatroomName = event.target.value;
     setChatRoomName(selectedChatroomName);
-    setChatRoomNameTaken(false);
-    chatrooms.chatrooms.map((chatroom) => {
-      if(chatroom === selectedChatroomName) {
-        setChatRoomNameTaken(true);
-      }
-    });
+    setChatRoomNameTaken(chatrooms.chatrooms.includes(selectedChatroomName));
   };
 
   const handleEmailTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // const selectedEmailAddress = event.target.value;
     const selectedEmailAddress = event.target.value;
     setEmailAddress(selectedEmailAddress);
     setInvalidEmailAddress(!validateEmailAddress(selectedEmailAddress));
   };
 
   const handleUsernameTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value);
+    const selectedUsername = event.target.value;
+    setUsername(selectedUsername);
   };
 
   const isButtonDisabled = chatRoomName === "" || username === "" || isChatRoomNameTaken;
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -111,7 +107,8 @@ function ChatRoomCreationForm() {
         {isChatRoomNameTaken && (
           <FormHelperText sx={{ color: "red", ml: 1 }}>The chat room name is already taken.</FormHelperText>
         )}
-        <FormHelperText sx={{ color: "black", ml: 1 }}>Email</FormHelperText>
+
+        <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Email</FormHelperText>
         <InputBase
           id="email"
           placeholder="What's your email?"
@@ -128,7 +125,8 @@ function ChatRoomCreationForm() {
         {isInvalidEmailAddress && (
           <FormHelperText sx={{ color: "red", ml: 1 }}>Please enter a valid email address.</FormHelperText>
         )}
-        <FormHelperText sx={{ color: "black", ml: 1, mt: 3 }}>Username</FormHelperText>
+
+        <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Username</FormHelperText>
         <InputBase
           id="username"
           placeholder="What's your username?"
@@ -143,6 +141,7 @@ function ChatRoomCreationForm() {
             p: 1,
             }}
           />
+
         <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center"}}>
           <Button onClick={() => navigate("/room")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>

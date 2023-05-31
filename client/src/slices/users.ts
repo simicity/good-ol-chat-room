@@ -1,18 +1,28 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
+  const response = await axios.get('http://localhost:3000/users');
+  return response.data;
+});
+
+interface usersPerRoomData {
+  chatroom: string,
+  users: string[],
+}
 
 const usersSlice = createSlice({
   name: 'users',
-  initialState: [] as string[],
-  reducers: {
-    addUser: (state, action: PayloadAction<string>) => {
-      state.push(action.payload)
-    },
-    removeUser: (state, action: PayloadAction<string>) => {
-      state.filter(user => user !== action.payload);
-    },
+  initialState: [] as usersPerRoomData[],
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(fetchUsers.fulfilled, (state, action) => {
+      const data = action.payload;
+      data.map((d: usersPerRoomData) => {
+        state.push({chatroom: d.chatroom, users: d.users});
+      });
+    });
   },
 });
 
-export const { addUser, removeUser } = usersSlice.actions;
 export default usersSlice.reducer;

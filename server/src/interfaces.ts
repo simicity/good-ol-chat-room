@@ -25,6 +25,7 @@ export interface SocketData {
 
 export interface sessionData {
   userID: string;
+  username: string;
   connected: boolean;
   chatroom?: string;
 }
