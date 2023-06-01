@@ -184,8 +184,8 @@ app.get("/rooms", (req: Request, res: Response) => {
 });
 
 app.post("/room", (req: Request, res: Response) => {
-  db.run(`INSERT INTO chatrooms (chatroom, email) VALUES (?,?)`,
-    [req.body.name, req.body.email],
+  db.run(`INSERT INTO chatrooms (chatroom, password) VALUES (?,?)`,
+    [req.body.name, req.body.password],
     (err) => {
       if (err) {
         res.status(400).json({ "error": err.message });
@@ -195,8 +195,19 @@ app.post("/room", (req: Request, res: Response) => {
     });
 });
 
-app.delete("/room/delete/:chatroom", (req: Request, res: Response) => {
-  db.run(`DELETE FROM chatrooms WHERE chatroom = ?`, [req.params.chatroom],
+app.delete("/room/delete/:chatroom/:password", (req: Request, res: Response) => {
+  const chatroom = req.params.chatroom;
+  const password = req.params.password;
+  db.get(`SELECT password FROM chatrooms WHERE chatroom = ? AND password = ?`, [chatroom, password], (err, row) => {
+    if (err) {
+      res.status(400).json({"error": err.message});
+      return;
+    }
+    if (row == undefined) {
+      res.status(406).json({"error": "Password did not match!"});
+      return;
+    }
+    db.run(`DELETE FROM chatrooms WHERE chatroom = (?)`, [chatroom],
     (err) => {
       if (err) {
         res.status(400).json({ "error": err.message });
@@ -204,6 +215,7 @@ app.delete("/room/delete/:chatroom", (req: Request, res: Response) => {
       }
       res.status(200).end();
     });
+  });
 });
 
 const PORT = process.env.PORT || 3000;

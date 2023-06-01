@@ -1,13 +1,22 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAppSelector } from '../slices/hooks';
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import Button from '@mui/material/Button';
 import { disconnect } from '../utils/socketHelper';
 import { resetColorPerUserCache } from './chat/ChatMessage';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 function AppHeader({ type }: { type: string }) {
-  const chatroom = useAppSelector(state => state.chatroom);
+  let currentChatroom = "";
+  if(type === "join-chatroom" || type === "inside-chatroom") {
+    currentChatroom = useAppSelector(state => state.chatroom);    
+  } else if(type === "delete-chatroom") {
+    const { chatroom } = useParams();
+    if(chatroom) {
+      currentChatroom = chatroom;
+    }
+  }
 
   let title: string | undefined;
   switch(type) {
@@ -15,10 +24,13 @@ function AppHeader({ type }: { type: string }) {
       title = "Select Chat Room to Join";
       break;
     case "join-chatroom":
-      title = "Joining " + chatroom;
+      title = "Joining " + currentChatroom;
+      break;
+    case "delete-chatroom":
+      title = "Delete " + currentChatroom;
       break;
     case "inside-chatroom":
-      title = chatroom;
+      title = currentChatroom;
       break;
   }
 
@@ -33,9 +45,10 @@ function AppHeader({ type }: { type: string }) {
         {title}
       </Typography>
       {type === "inside-chatroom" && (
-        <Button component={RouterLink} to="/room" onClick={handleLeave} sx={{ mr: 3 }}>
+        <Button component={RouterLink} to="/rooms" onClick={handleLeave} sx={{ mr: 3 }}>
+          <ExitToAppIcon sx={{ color: "primary", mr: 1 }} />
           Leave
-        </Button>      
+        </Button>   
       )}
     </Stack>
   );

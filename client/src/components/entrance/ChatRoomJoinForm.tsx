@@ -73,7 +73,7 @@ function ChatRoomJoinForm() {
           <FormHelperText sx={{ color: "red", ml: 1 }}>The chat room name is already taken.</FormHelperText>
         )}
         <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center", mt: 3}}>
-          <Button onClick={() => navigate("/room")}>Cancel</Button>
+          <Button onClick={() => navigate("/rooms")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>
         </Stack>
       </form>

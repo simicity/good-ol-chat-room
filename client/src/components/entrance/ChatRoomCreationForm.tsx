@@ -11,6 +11,7 @@ import { connect } from '../../utils/socketHelper';
 import { setRoom } from '../../slices/chatroom';
 import { connectUser } from '../../slices/user';
 import axios from 'axios';
+import Tooltip from '@mui/material/Tooltip';
 
 const style = {
   position: 'absolute',
@@ -24,16 +25,10 @@ const style = {
   backgroundColor: 'white',
 }
 
-const validateEmailAddress = (email: string) => {
-  // Regex pattern for email validation
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailPattern.test(email);
-}
-
-const createChatRoom = async (chatroom: string, email: string) => {
+const createChatRoom = async (chatroom: string, password: string) => {
   await axios.post('http://localhost:3000/room', {
       "name": chatroom,
-      "email": email,
+      "password": password,
   }, {
     headers: {
       'Content-Type': 'application/json'
@@ -50,23 +45,21 @@ function ChatRoomCreationForm() {
   const dispatch = useAppDispatch();
   const [chatRoomName, setChatRoomName] = useState("");
   const [isChatRoomNameTaken, setChatRoomNameTaken] = useState(false);
-  const [emailAddress, setEmailAddress] = useState("");
-  const [isInvalidEmailAddress, setInvalidEmailAddress] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isInvalidPassword, setInvalidPassword] = useState(false);
   const [username, setUsername] = useState("");
   const chatrooms = useAppSelector(state => state.chatrooms);
 
   const handleChatRoomTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // const selectedChatroomName = event.target.value;
     const selectedChatroomName = event.target.value;
     setChatRoomName(selectedChatroomName);
     setChatRoomNameTaken(chatrooms.chatrooms.includes(selectedChatroomName));
   };
 
-  const handleEmailTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // const selectedEmailAddress = event.target.value;
-    const selectedEmailAddress = event.target.value;
-    setEmailAddress(selectedEmailAddress);
-    setInvalidEmailAddress(!validateEmailAddress(selectedEmailAddress));
+  const handlePasswordTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedPassword = event.target.value;
+    setPassword(selectedPassword);
+    setInvalidPassword(selectedPassword.length < 4);
   };
 
   const handleUsernameTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,11 +67,11 @@ function ChatRoomCreationForm() {
     setUsername(selectedUsername);
   };
 
-  const isButtonDisabled = chatRoomName === "" || username === "" || isChatRoomNameTaken;
+  const isButtonDisabled = chatRoomName === "" || username === "" || isChatRoomNameTaken || isInvalidPassword;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    createChatRoom(chatRoomName, emailAddress);
+    createChatRoom(chatRoomName, password);
     connect(username);
     dispatch(connectUser(username));
     dispatch(setRoom(chatRoomName));
@@ -108,13 +101,15 @@ function ChatRoomCreationForm() {
           <FormHelperText sx={{ color: "red", ml: 1 }}>The chat room name is already taken.</FormHelperText>
         )}
 
-        <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Email</FormHelperText>
+        <Tooltip title="You need this password when deleting this chatroom." placement="right-end" arrow>
+          <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Password</FormHelperText>
+        </Tooltip>
         <InputBase
-          id="email"
-          placeholder="What's your email?"
+          id="password"
+          placeholder="What's your password?"
           size="small"
-          value={emailAddress}
-          onChange={handleEmailTextFieldChange}
+          value={password}
+          onChange={handlePasswordTextFieldChange}
           sx={{ 
             backgroundColor: "#EBEDEF",
             borderRadius: "10px",
@@ -122,8 +117,8 @@ function ChatRoomCreationForm() {
             p: 1,
             }}
           />
-        {isInvalidEmailAddress && (
-          <FormHelperText sx={{ color: "red", ml: 1 }}>Please enter a valid email address.</FormHelperText>
+        {isInvalidPassword && (
+          <FormHelperText sx={{ color: "red", ml: 1 }}>Password has to be longer than 4 characters.</FormHelperText>
         )}
 
         <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Username</FormHelperText>
@@ -143,7 +138,7 @@ function ChatRoomCreationForm() {
           />
 
         <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center"}}>
-          <Button onClick={() => navigate("/room")}>Cancel</Button>
+          <Button onClick={() => navigate("/rooms")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>
         </Stack>
       </form>

@@ -9,6 +9,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { useSocket } from './utils/socketHelper';
+import ChatRoomDeleteForm from './components/entrance/ChatRoomDeleteForm';
 
 const router = createBrowserRouter([
   {
@@ -16,11 +17,11 @@ const router = createBrowserRouter([
     element: <ChatRoomList />
   },
   {
-    path: "/room",
+    path: "/rooms",
     element: <ChatRoomList />
   },
   {
-    path: "/room/join/:id",
+    path: "/room/join/:chatroom",
     element: <ChatRoomJoinForm />,
   },
   {
@@ -28,7 +29,11 @@ const router = createBrowserRouter([
     element: <ChatRoomCreationForm />,
   },
   {
-    path: "/room/:id",
+    path: "/room/delete/:chatroom",
+    element: <ChatRoomDeleteForm />,
+  },
+  {
+    path: "/room/:chatroom",
     element: <ChatRoom />
   }
 ]);

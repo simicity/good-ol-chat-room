@@ -6,7 +6,7 @@ const db = new Database('good-ol-chat-room.db');
 // Create a table if it does not exist
 db.serialize(() => {
   // Create the users table if it doesn't exist
-  db.run('CREATE TABLE IF NOT EXISTS chatrooms (chatroom TEXT PRIMARY KEY, email TEXT)');
+  db.run('CREATE TABLE IF NOT EXISTS chatrooms (chatroom TEXT PRIMARY KEY, password TEXT)');
 });
 
 export default db;
