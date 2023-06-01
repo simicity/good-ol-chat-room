@@ -18,9 +18,10 @@ const usersSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchUsers.fulfilled, (state, action) => {
       const data = action.payload;
-      data.map((d: usersPerRoomData) => {
-        state.push({chatroom: d.chatroom, users: d.users});
-      });
+      return data.map((d: usersPerRoomData) => ({
+        chatroom: d.chatroom,
+        users: d.users,
+      }));
     });
   },
 });

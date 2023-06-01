@@ -5,27 +5,22 @@ import { setRoom } from '../../slices/chatroom';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
-import { fetchUsers } from '../../slices/users';
-import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
-import { RootState } from '../../slices/store';
-import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
 import Button from '@mui/material/Button';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Stack from '@mui/material/Stack';
+import { useEffect } from 'react';
 
 function ChatRoomCard({ chatroom }: { chatroom: string }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const thunkDispatch: ThunkDispatch<RootState, undefined, AnyAction> = useDispatch();
 
   const usersPerRoom = useAppSelector(state => state.users);
   let numOfUsers = 0;
-  usersPerRoom.forEach(data => {
+  usersPerRoom.forEach((data) => {
     if(data.chatroom === chatroom) {
       numOfUsers = data.users.length;
     }
-  });
+  })
 
   const handleClick = () => {
     if(chatroom) {
@@ -41,8 +36,17 @@ function ChatRoomCard({ chatroom }: { chatroom: string }) {
   }
 
   useEffect(() => {
-    thunkDispatch(fetchUsers());
-  }, [dispatch]);
+    function updateUsersPerRoom() {
+      console.log(usersPerRoom)
+      usersPerRoom.forEach((data) => {
+        if(data.chatroom === chatroom) {
+          numOfUsers = data.users.length;
+        }
+      })
+    }
+
+    updateUsersPerRoom();
+  }, [usersPerRoom, chatroom]);
 
   return (
     <Stack direction={"column"}>

@@ -38,15 +38,19 @@ function AppHeader({ type }: { type: string }) {
   }
 
   useEffect(() => {
-    if(type === "inside-chatroom" && !currentChatroom) {
-      if(!chatroom || !user) {
-        navigate('/rooms');
-        return;
-      }
-      dispatch(setRoom(chatroom));
-      reconnect();
-    } 
-  }, [currentChatroom]);
+    function handleConnectionError() {
+      if(type === "inside-chatroom" && !currentChatroom) {
+        if(!chatroom || !user) {
+          navigate('/rooms');
+          return;
+        }
+        dispatch(setRoom(chatroom));
+        reconnect();
+      } 
+    }
+
+    handleConnectionError();
+  }, [dispatch, currentChatroom]);
 
   return (
     <Stack direction="row" sx={{ justifyContent: "space-between", borderBottom: "1px solid #eee" }}>

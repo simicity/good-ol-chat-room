@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import { RootState } from '../../slices/store';
 import { useDispatch } from 'react-redux';
+import { fetchUsers } from '../../slices/users';
 
 function ChatRoomListBody() {
   const chatrooms = useAppSelector(state => state.chatrooms);
@@ -22,8 +23,18 @@ function ChatRoomListBody() {
   }
 
   useEffect(() => {
+    // Fetch data every 3 seconds
+    const interval = setInterval(() => {
+      thunkDispatch(fetchUsers());
+    }, 3000);
+
+    thunkDispatch(fetchUsers());
     thunkDispatch(fetchChatRooms());
-  }, [thunkDispatch]);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [thunkDispatch, chatrooms]);
   
   return (
     <Box sx={{ overflow: "scroll", p: 2 }}>
