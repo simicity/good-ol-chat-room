@@ -35,18 +35,18 @@ const messageStore = new InMemoryMessageStore();
 
 io.use((socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
-  const username = socket.handshake.auth.username;
-  if (!username) {
-    return next(new Error("invalid username"));
-  }
   if (sessionID) {
     const session = sessionStore.findSession(sessionID);
     if (session) {
       socket.data.sessionID = sessionID;
       socket.data.userID = session.userID;
-      socket.data.username = username;
+      socket.data.username = session.username;
       return next();
     }
+  }
+  const username = socket.handshake.auth.username;
+  if (!username) {
+    return next(new Error("invalid username"));
   }
   socket.data.sessionID = randomId();
   socket.data.userID = randomId();

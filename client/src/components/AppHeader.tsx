@@ -1,21 +1,23 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useAppSelector } from '../slices/hooks';
+import { useAppDispatch, useAppSelector } from '../slices/hooks';
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import Button from '@mui/material/Button';
-import { disconnect } from '../utils/socketHelper';
+import { reconnect, disconnect } from '../utils/socketHelper';
 import { resetColorPerUserCache } from './chat/ChatMessage';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useEffect } from 'react';
+import { setRoom } from '../slices/chatroom';
 
 function AppHeader({ type }: { type: string }) {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { chatroom } = useParams();
 
   let currentChatroom = "";
   if(type === "join-chatroom" || type === "inside-chatroom") {
     currentChatroom = useAppSelector(state => state.chatroom);
   } else if(type === "delete-chatroom") {
-    const { chatroom } = useParams();
     if(chatroom) {
       currentChatroom = chatroom;
     }
@@ -44,7 +46,12 @@ function AppHeader({ type }: { type: string }) {
 
   useEffect(() => {
     if(!currentChatroom) {
-      navigate('/rooms')
+      if(!chatroom) {
+        navigate('/rooms');
+        return;
+      }
+      dispatch(setRoom(chatroom));
+      reconnect();
     } 
   }, [currentChatroom]);
 

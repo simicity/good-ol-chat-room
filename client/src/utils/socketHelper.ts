@@ -1,11 +1,17 @@
 import { useEffect } from "react";
 import socket from './socket';
 import { useAppDispatch, useAppSelector } from '../slices/hooks';
-import { addMessage } from '../slices/messages';
+import { addMessage, clearMessage } from '../slices/messages';
 import { disconnectUser } from "../slices/user";
 
 const connect = (username: string) => {
   socket.auth = { username: username };
+  socket.connect();
+};
+
+const reconnect = () => {
+  const sessionID = localStorage.getItem("sessionID");
+  socket.auth = { sessionID: sessionID };
   socket.connect();
 };
 
@@ -20,6 +26,7 @@ const useSocket = () => {
   useEffect(() => {
     function onDisconnect() {
       dispatch(disconnectUser());
+      dispatch(clearMessage());
     }
 
     socket.on("connect", () => {
@@ -30,6 +37,13 @@ const useSocket = () => {
       }
       socket.emit("joinChatRoom", chatroom);
     })
+
+    socket.on("session", (sessionID) => {
+      // attach the session ID to the next reconnection attempts
+      socket.auth = { sessionID };
+      // store it in the localStorage
+      localStorage.setItem("sessionID", sessionID);
+    });
 
     socket.on("chatroomCachedMessages", (messages) => {
       messages.forEach(message => dispatch(addMessage(message)));
@@ -69,6 +83,7 @@ const useSocket = () => {
 
 export {
   connect,
+  reconnect,
   useSocket,
   disconnect,
 };
