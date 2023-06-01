@@ -13,15 +13,8 @@ function AppHeader({ type }: { type: string }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { chatroom } = useParams();
-
-  let currentChatroom = "";
-  if(type === "join-chatroom" || type === "inside-chatroom") {
-    currentChatroom = useAppSelector(state => state.chatroom);
-  } else if(type === "delete-chatroom") {
-    if(chatroom) {
-      currentChatroom = chatroom;
-    }
-  }
+  const currentChatroom = useAppSelector(state => state.chatroom);
+  const user = useAppSelector(state => state.user);
 
   let title: string | undefined;
   switch(type) {
@@ -32,7 +25,7 @@ function AppHeader({ type }: { type: string }) {
       title = "Joining " + currentChatroom;
       break;
     case "delete-chatroom":
-      title = "Delete " + currentChatroom;
+      title = "Delete " + chatroom;
       break;
     case "inside-chatroom":
       title = currentChatroom;
@@ -45,8 +38,8 @@ function AppHeader({ type }: { type: string }) {
   }
 
   useEffect(() => {
-    if(!currentChatroom) {
-      if(!chatroom) {
+    if(type === "inside-chatroom" && !currentChatroom) {
+      if(!chatroom || !user) {
         navigate('/rooms');
         return;
       }
