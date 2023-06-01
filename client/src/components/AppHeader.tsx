@@ -1,16 +1,19 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAppSelector } from '../slices/hooks';
-import { Link as RouterLink, useParams } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import Button from '@mui/material/Button';
 import { disconnect } from '../utils/socketHelper';
 import { resetColorPerUserCache } from './chat/ChatMessage';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { useEffect } from 'react';
 
 function AppHeader({ type }: { type: string }) {
+  const navigate = useNavigate();
+
   let currentChatroom = "";
   if(type === "join-chatroom" || type === "inside-chatroom") {
-    currentChatroom = useAppSelector(state => state.chatroom);    
+    currentChatroom = useAppSelector(state => state.chatroom);
   } else if(type === "delete-chatroom") {
     const { chatroom } = useParams();
     if(chatroom) {
@@ -38,6 +41,12 @@ function AppHeader({ type }: { type: string }) {
     resetColorPerUserCache();
     disconnect();
   }
+
+  useEffect(() => {
+    if(!currentChatroom) {
+      navigate('/rooms')
+    } 
+  }, [currentChatroom]);
 
   return (
     <Stack direction="row" sx={{ justifyContent: "space-between", borderBottom: "1px solid #eee" }}>
