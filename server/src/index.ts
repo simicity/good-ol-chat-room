@@ -95,7 +95,8 @@ io.on("connection", (socket) => {
         to: socket.data.chatroom,
         timestamp: new Date(),
       };
-      socket.to(socket.data.userID).emit("chatroomCachedMessages", messageStore.findMessagesForChatRoom(socket.data.chatroom));
+      messageStore.saveMessage(message);
+      socket.emit("chatroomCachedMessages", messageStore.findMessagesForChatRoom(socket.data.chatroom));
       io.to(socket.data.chatroom).emit("userJoined", message);
     }
   });
@@ -141,6 +142,7 @@ io.on("connection", (socket) => {
           to: socket.data.chatroom,
           timestamp: new Date(),
         };
+        messageStore.saveMessage(message);
         io.to(socket.data.chatroom).emit("userLeft", message);
       }
       // update the connection status of the session
