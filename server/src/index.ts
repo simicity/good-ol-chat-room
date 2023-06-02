@@ -95,8 +95,8 @@ io.on("connection", (socket) => {
         to: socket.data.chatroom,
         timestamp: new Date(),
       };
-      messageStore.saveMessage(message);
       socket.emit("chatroomCachedMessages", messageStore.findMessagesForChatRoom(socket.data.chatroom));
+      messageStore.saveMessage(message);
       io.to(socket.data.chatroom).emit("userJoined", message);
     }
   });
