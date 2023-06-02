@@ -8,19 +8,14 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Stack from '@mui/material/Stack';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function ChatRoomCard({ chatroom }: { chatroom: string }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const usersPerRoom = useAppSelector(state => state.users);
-  let numOfUsers = 0;
-  usersPerRoom.forEach((data) => {
-    if(data.chatroom === chatroom) {
-      numOfUsers = data.users.length;
-    }
-  })
+  const [numOfUsers, setNumOfUsers] = useState(0);
 
   const handleClick = () => {
     if(chatroom) {
@@ -37,16 +32,15 @@ function ChatRoomCard({ chatroom }: { chatroom: string }) {
 
   useEffect(() => {
     function updateUsersPerRoom() {
-      console.log(usersPerRoom)
+      setNumOfUsers(0);
       usersPerRoom.forEach((data) => {
-        if(data.chatroom === chatroom) {
-          numOfUsers = data.users.length;
+        if (data.chatroom === chatroom) {
+          setNumOfUsers(data.users.length);
         }
-      })
+      });
     }
-
     updateUsersPerRoom();
-  }, [usersPerRoom, chatroom]);
+  }, [usersPerRoom]);
 
   return (
     <Stack direction={"column"}>

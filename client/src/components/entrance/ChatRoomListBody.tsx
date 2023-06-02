@@ -34,7 +34,7 @@ function ChatRoomListBody() {
     return () => {
       clearInterval(interval);
     };
-  }, [thunkDispatch, chatrooms]);
+  }, [thunkDispatch]);
   
   return (
     <Box sx={{ overflow: "scroll", p: 2 }}>
