@@ -21,6 +21,9 @@ function AppHeader({ type }: { type: string }) {
     case "select-chatroom":
       title = "Select Chat Room to Join";
       break;
+    case "create-chatroom":
+      title = "Create Chat Room and Join";
+      break;
     case "join-chatroom":
       title = "Joining " + currentChatroom;
       break;

@@ -80,7 +80,7 @@ function ChatRoomCreationForm() {
 
   return (
     <Box sx={style}>
-      <AppHeader type={"join-chatroom"} />
+      <AppHeader type={"create-chatroom"} />
       <Box sx={{ p: 3 }}>  
       <form onSubmit={handleSubmit}>
         <FormHelperText sx={{ color: "black", ml: 1 }}>Chat Room Name</FormHelperText>
