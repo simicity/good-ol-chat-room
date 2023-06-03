@@ -8,22 +8,30 @@ const CACHE_SIZE = 1000;
 }
 
 class InMemoryMessageStore extends MessageStore {
-  private messages: messageData[];
+  private messagesPerChatRoom;
 
   constructor() {
     super();
-    this.messages = [];
+    this.messagesPerChatRoom = new Map<string, messageData[]>();
   }
 
   saveMessage(message: messageData) {
-    if(this.messages && this.messages.length > CACHE_SIZE) {
-      this.messages.shift()
+    if(this.messagesPerChatRoom.has(message.to)) {
+      const chatRoomMessages = this.messagesPerChatRoom.get(message.to);
+      if (chatRoomMessages) {
+        if(chatRoomMessages.length > CACHE_SIZE) {
+          chatRoomMessages.shift();
+        } else {
+          chatRoomMessages.push(message);
+        }
+      }
+    } else {
+      this.messagesPerChatRoom.set(message.to, []);
     }
-    this.messages.push(message);
   }
 
   findMessagesForChatRoom(chatroom: string) {
-    return this.messages.filter(message => message.to === chatroom);
+    return this.messagesPerChatRoom.has(chatroom) ? this.messagesPerChatRoom.get(chatroom) : [];
   }
 }
 
