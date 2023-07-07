@@ -1,18 +1,23 @@
-import Grid from '@mui/material/Grid';
-import InputBase from '@mui/material/InputBase';
-import Button from '@mui/material/Button';
 import { useState } from 'react';
 import socket from '../../utils/socket';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import InputBase from '@mui/material/InputBase';
+import SendIcon from '@mui/icons-material/Send';
+import IconButton from '@mui/material/IconButton';
 
-const gridContainerStyle = {
-  backgroundColor: "#EDE7F6",
-  padding: "10px 15px",
+const messageAreaStyle = {
+  border: 1,
+  borderColor: "text.secondary",
+  borderRadius: '10px',
+  m: 1.5,
 }
 
 const textFieldStyle = {
-  backgroundColor: "white",
+  backgroundColor: "background.default",
   borderRadius: "10px",
-  padding: "5px 10px 3px 10px",
+  p: 1.5,
+  pr: 4,
   width: "100%"
 }
 
@@ -35,21 +40,23 @@ function ChatMessageForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Grid container sx={gridContainerStyle}>
-        <Grid item xs={10} sx={textFieldStyle}>
-          <InputBase
-            id="messageToSend"
-            placeholder="Write Message..."
-            size="small"
-            value={textFieldValue}
-            onChange={handleTextFieldChange}
-            sx={textFieldStyle}
-            />
-        </Grid>
-        <Grid item xs={2} sx={{ display: "flex", justifyContent: "center" }}>
-          <Button type="submit" variant="contained" color="secondary" disabled={isButtonDisabled}>Send</Button>
-        </Grid>
-      </Grid>
+      <Stack direction={"row"} sx={messageAreaStyle}>
+        <InputBase
+          id="messageToSend"
+          placeholder="Write Message..."
+          size="small"
+          fullWidth
+          multiline
+          value={textFieldValue}
+          onChange={handleTextFieldChange}
+          sx={textFieldStyle}
+          />
+        <Box sx={{ justifyContent: "end" }}>
+          <IconButton type="submit" disabled={isButtonDisabled} sx={{ position: "absolute", bottom: 0, right: 0, m: 1.5, mb: 2, color: "text.primary" }}>
+            <SendIcon />
+          </IconButton>
+        </Box>
+      </Stack>
     </form>
   )
 }

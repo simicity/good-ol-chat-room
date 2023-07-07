@@ -1,11 +1,11 @@
 import { messageData } from '../../interfaces';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { formatTimeStamp } from '../../utils/formatter';
 
 const style = {
-  backgroundColor: '#EAF2F8', 
-  margin: '10px 5px', 
-  p: '5px 15px', 
+  color: "text.primary",
+  m: 1,
   borderRadius: '10px',
 }
 
@@ -33,18 +33,7 @@ const generateRandomColor = (username: string) => {
 }
 
 const createTimeStamp = (date: Date) => {
-  const timestamp = new Date(date);
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  };
-
-  return timestamp.toLocaleString('en-US', options).replace(",", "");
+  return formatTimeStamp(date);
 }
 
 function ChatMessage({ message }: { message: messageData }) {
@@ -57,21 +46,21 @@ function ChatMessage({ message }: { message: messageData }) {
             <Typography variant="caption" component="span" sx={{ color: generateRandomColor(message.from), fontWeight: "bold" }}>
               {message.from}
             </Typography>
-            <Typography variant="caption" component="span">
+            <Typography variant="caption" component="span" sx={{ color: "text.disabled", ml: 1 }}>
               {createTimeStamp(message.timestamp)}
             </Typography>
           </Box>
-          <Typography variant="body2" component="p">
+          <Typography variant="body2" component="p" sx={{ mt: -0.8 }}>
             {message.message}
           </Typography>
         </Box>
       ) : (
         <Box sx={style}>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="body2" component="p">
+          <Box sx={{ display: "flex", justifyContent: "space-between", color: "text.disabled" }}>
+            <Typography variant="caption" component="p">
               {message.message}
             </Typography>
-            <Typography variant="caption" component="span">
+            <Typography variant="caption" component="span" sx={{ color: "text.disabled", ml: 1 }}>
               {createTimeStamp(message.timestamp)}
             </Typography>
           </Box>

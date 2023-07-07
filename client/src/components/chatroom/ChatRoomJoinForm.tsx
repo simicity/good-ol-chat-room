@@ -19,7 +19,7 @@ const style = {
   height: '400px',
   borderRadius: '15px',
   boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
-  backgroundColor: 'white',
+  backgroundColor: 'background.default',
 }
 
 function ChatRoomJoinForm() {
@@ -47,7 +47,7 @@ function ChatRoomJoinForm() {
     event.preventDefault();
     connect(username);
     dispatch(connectUser(username));
-    navigate('/room/' + chatroom);
+    navigate('/chatroom/' + chatroom);
   };
 
   return (
@@ -55,7 +55,7 @@ function ChatRoomJoinForm() {
       <AppHeader type={"join-chatroom"} />
       <Box sx={{ p: 3 }}>  
       <form onSubmit={handleSubmit}>
-        <FormHelperText sx={{ color: "black", ml: 1 }}>Username</FormHelperText>
+        <FormHelperText sx={{ color: "text.primary", ml: 1 }}>Username</FormHelperText>
         <InputBase
           id="username"
           placeholder="What's your username?"
@@ -63,7 +63,7 @@ function ChatRoomJoinForm() {
           value={username}
           onChange={handleTextFieldChange}
           sx={{ 
-            backgroundColor: "#EBEDEF",
+            backgroundColor: "background.paper",
             borderRadius: "10px",
             width: "100%",
             p: 1,
@@ -73,7 +73,7 @@ function ChatRoomJoinForm() {
           <FormHelperText sx={{ color: "red", ml: 1 }}>The chat room name is already taken.</FormHelperText>
         )}
         <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center", mt: 3}}>
-          <Button onClick={() => navigate("/rooms")}>Cancel</Button>
+          <Button onClick={() => navigate("/lobby")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>
         </Stack>
       </form>

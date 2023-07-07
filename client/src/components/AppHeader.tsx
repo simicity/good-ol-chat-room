@@ -44,7 +44,7 @@ function AppHeader({ type }: { type: string }) {
     function handleConnectionError() {
       if(type === "inside-chatroom" && !currentChatroom) {
         if(!chatroom || !user) {
-          navigate('/rooms');
+          navigate('/lobby');
           return;
         }
         dispatch(setRoom(chatroom));
@@ -56,13 +56,13 @@ function AppHeader({ type }: { type: string }) {
   }, [dispatch, currentChatroom]);
 
   return (
-    <Stack direction="row" sx={{ justifyContent: "space-between", borderBottom: "1px solid #eee" }}>
+    <Stack direction="row" sx={{ justifyContent: "space-between", borderBottom: "1px solid #eee", color: "text.primary" }}>
       <Typography variant="subtitle1" component="h2" sx={{ fontWeight: "bold", m: 1, ml: 3 }}>
         {title}
       </Typography>
       {type === "inside-chatroom" && (
-        <Button component={RouterLink} to="/rooms" onClick={handleLeave} sx={{ mr: 3 }}>
-          <ExitToAppIcon sx={{ color: "primary", mr: 1 }} />
+        <Button component={RouterLink} to="/lobby" onClick={handleLeave} sx={{ mr: 2 }}>
+          <ExitToAppIcon sx={{ color: "primary", mr: 0.4 }} />
           Leave
         </Button>   
       )}

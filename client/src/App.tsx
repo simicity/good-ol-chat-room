@@ -1,57 +1,90 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import './styles/App.css';
 import ChatRoom from './components/chat/ChatRoom';
-import ChatRoomList from './components/entrance/ChatRoomList';
-import ChatRoomJoinForm from './components/entrance/ChatRoomJoinForm';
-import ChatRoomCreationForm from './components/entrance/ChatRoomCreationForm'
+import Lobby from './components/lobby/Lobby';
+import ChatRoomJoinForm from './components/chatroom/ChatRoomJoinForm';
+import ChatRoomCreationForm from './components/chatroom/ChatRoomCreationForm'
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import { useSocket } from './utils/socketHelper';
-import ChatRoomDeleteForm from './components/entrance/ChatRoomDeleteForm';
+import ChatRoomDeleteForm from './components/chatroom/ChatRoomDeleteForm';
+import { createContext, useMemo, useState } from 'react';
+import ColorMode from './components/ColorMode';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <ChatRoomList />
+    element: <Lobby />
   },
   {
-    path: "/rooms",
-    element: <ChatRoomList />
+    path: "/lobby",
+    element: <Lobby />
   },
   {
-    path: "/room/join/:chatroom",
+    path: "/chatroom/join/:chatroom",
     element: <ChatRoomJoinForm />,
   },
   {
-    path: "/room/create",
+    path: "/chatroom/create",
     element: <ChatRoomCreationForm />,
   },
   {
-    path: "/room/delete/:chatroom",
+    path: "/chatroom/delete/:chatroom",
     element: <ChatRoomDeleteForm />,
   },
   {
-    path: "/room/:chatroom",
+    path: "/chatroom/:chatroom",
     element: <ChatRoom />
   }
 ]);
 
-function App() {
-  const theme = createTheme({
-    typography: {
-      fontFamily: ['Wix Madefor Text', 'sans-serif'].join(","),
-    },
-  });
+export const ColorModeContext = createContext({ toggleColorMode: () => {} });
+
+export default function App() {
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+      },
+    }),
+    [],
+  );
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          ...(mode === 'light') ? {
+            background: {
+              paper: "#F4FAFB"
+            }
+          } : {
+            background: {
+              paper: "#424242"
+            }
+          }
+        },
+        typography: {
+          button: {
+            textTransform: 'none'
+          }
+        },
+      }),
+    [mode],
+  );
 
   useSocket();
 
   return (
-    <ThemeProvider theme={theme}>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <RouterProvider router={router} />
+        <ColorMode />
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   )
 }
-
-export default App;

@@ -1,5 +1,5 @@
 import AppHeader from '../AppHeader';
-import ChatRoomListBody from './ChatRoomListBody';
+import LobbyBody from './LobbyBody';
 import Stack from '@mui/material/Stack';
 
 const style = {
@@ -12,16 +12,14 @@ const style = {
   maxWidth: '1000px',
   borderRadius: '15px',
   boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
-  backgroundColor: 'white',
+  backgroundColor: 'background.default',
 }
 
-function ChatRoomEntrance() {
+export default function Lobby() {
   return (
     <Stack direction="column" sx={style}>
       <AppHeader type={"select-chatroom"} />
-      <ChatRoomListBody />
+      <LobbyBody />
     </Stack>
   )
 }
-
-export default ChatRoomEntrance;

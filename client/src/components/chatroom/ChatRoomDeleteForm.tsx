@@ -1,4 +1,4 @@
-import AppHeader from './../AppHeader';
+import AppHeader from '../AppHeader';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
@@ -20,7 +20,7 @@ const style = {
   height: '400px',
   borderRadius: '15px',
   boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
-  backgroundColor: 'white',
+  backgroundColor: 'background.default',
 }
 
 function ChatRoomDeleteForm() {
@@ -41,7 +41,7 @@ function ChatRoomDeleteForm() {
       }
       return;
     }
-    navigate('/rooms');
+    navigate('/lobby');
   }
 
   const handleToastClose = (event: React.SyntheticEvent | Event, reason?: string) => {
@@ -71,7 +71,7 @@ function ChatRoomDeleteForm() {
         <AppHeader type={"delete-chatroom"} />
         <Box sx={{ p: 3 }}>  
         <form onSubmit={handleSubmit}>
-          <FormHelperText sx={{ color: "black", ml: 1 }}>Password</FormHelperText>
+          <FormHelperText sx={{ color: "text.primary", ml: 1 }}>Password</FormHelperText>
           <InputBase
             id="password"
             placeholder="What's the password?"
@@ -79,7 +79,7 @@ function ChatRoomDeleteForm() {
             value={password}
             onChange={handlePasswordTextFieldChange}
             sx={{ 
-              backgroundColor: "#EBEDEF",
+              backgroundColor: "background.paper",
               borderRadius: "10px",
               width: "100%",
               mb: 3,
@@ -87,7 +87,7 @@ function ChatRoomDeleteForm() {
               }}
             />
           <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center"}}>
-            <Button onClick={() => navigate("/rooms")}>Cancel</Button>
+            <Button onClick={() => navigate("/lobby")}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={isInvalidPassword}>Delete</Button>
           </Stack>
         </form>

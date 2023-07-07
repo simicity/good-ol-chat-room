@@ -1,4 +1,4 @@
-import AppHeader from './../AppHeader';
+import AppHeader from '../AppHeader';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
@@ -22,7 +22,7 @@ const style = {
   height: '400px',
   borderRadius: '15px',
   boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
-  backgroundColor: 'white',
+  backgroundColor: 'background.default',
 }
 
 const createChatRoom = async (chatroom: string, password: string) => {
@@ -75,7 +75,7 @@ function ChatRoomCreationForm() {
     connect(username);
     dispatch(connectUser(username));
     dispatch(setRoom(chatRoomName));
-    navigate('/room/' + chatRoomName);
+    navigate('/chatroom/' + chatRoomName);
   };
 
   return (
@@ -83,15 +83,15 @@ function ChatRoomCreationForm() {
       <AppHeader type={"create-chatroom"} />
       <Box sx={{ p: 3 }}>  
       <form onSubmit={handleSubmit}>
-        <FormHelperText sx={{ color: "black", ml: 1 }}>Chat Room Name</FormHelperText>
+        <FormHelperText sx={{ color: "text.primary", ml: 1 }}>Chat Room Name</FormHelperText>
         <InputBase
           id="chatroom"
           placeholder="What's the room name?"
           size="small"
           value={chatRoomName}
           onChange={handleChatRoomTextFieldChange}
-          sx={{ 
-            backgroundColor: "#EBEDEF",
+          sx={{
+            backgroundColor: "background.paper",
             borderRadius: "10px",
             width: "100%",
             p: 1,
@@ -102,7 +102,7 @@ function ChatRoomCreationForm() {
         )}
 
         <Tooltip title="You need this password when deleting this chatroom." placement="right-end" arrow>
-          <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Password</FormHelperText>
+          <FormHelperText sx={{ color: "text.primary", ml: 1, mt: 1 }}>Password</FormHelperText>
         </Tooltip>
         <InputBase
           id="password"
@@ -110,8 +110,8 @@ function ChatRoomCreationForm() {
           size="small"
           value={password}
           onChange={handlePasswordTextFieldChange}
-          sx={{ 
-            backgroundColor: "#EBEDEF",
+          sx={{
+            backgroundColor: "background.paper",
             borderRadius: "10px",
             width: "100%",
             p: 1,
@@ -121,15 +121,15 @@ function ChatRoomCreationForm() {
           <FormHelperText sx={{ color: "red", ml: 1 }}>Password has to be longer than 4 characters.</FormHelperText>
         )}
 
-        <FormHelperText sx={{ color: "black", ml: 1, mt: 1 }}>Username</FormHelperText>
+        <FormHelperText sx={{ color: "text.primary", ml: 1, mt: 1 }}>Username</FormHelperText>
         <InputBase
           id="username"
           placeholder="What's your username?"
           size="small"
           value={username}
           onChange={handleUsernameTextFieldChange}
-          sx={{ 
-            backgroundColor: "#EBEDEF",
+          sx={{
+            backgroundColor: "background.paper",
             borderRadius: "10px",
             width: "100%",
             mb: 3,
@@ -138,7 +138,7 @@ function ChatRoomCreationForm() {
           />
 
         <Stack spacing={1} direction="row" sx={{display: "flex", justifyContent: "center"}}>
-          <Button onClick={() => navigate("/rooms")}>Cancel</Button>
+          <Button onClick={() => navigate("/lobby")}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isButtonDisabled}>Join</Button>
         </Stack>
       </form>

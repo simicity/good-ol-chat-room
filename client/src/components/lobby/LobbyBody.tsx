@@ -3,7 +3,7 @@ import { useAppSelector } from '../../slices/hooks';
 import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import ChatRoomCard from './ChatRoomCard';
+import ChatRoomCard from '../chatroom/ChatRoomCard';
 import CardActionArea from '@mui/material/CardActionArea';
 import Box from '@mui/material/Box';
 import { fetchChatRooms } from '../../slices/chatrooms';
@@ -13,13 +13,13 @@ import { RootState } from '../../slices/store';
 import { useDispatch } from 'react-redux';
 import { fetchUsers } from '../../slices/users';
 
-function ChatRoomListBody() {
+export default function LobbyBody() {
   const chatrooms = useAppSelector(state => state.chatrooms);
   const navigate = useNavigate();
   const thunkDispatch: ThunkDispatch<RootState, undefined, AnyAction> = useDispatch();
 
   const handleClick = () => {
-    navigate('/room/create');  
+    navigate('/chatroom/create');  
   }
 
   useEffect(() => {
@@ -41,8 +41,8 @@ function ChatRoomListBody() {
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} md={4} lg={3}>
           <Card variant="elevation" elevation={0}>
-            <CardActionArea onClick={handleClick} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 6 }}>
-              <AddIcon sx={{ color: "black" }} />
+            <CardActionArea onClick={handleClick} sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 6, backgroundColor: "background.default" }}>
+              <AddIcon sx={{ color: "text.primary" }} />
             </CardActionArea>
           </Card>
         </Grid>
@@ -57,5 +57,3 @@ function ChatRoomListBody() {
     </Box>
   );
 }
-
-export default ChatRoomListBody;
