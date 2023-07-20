@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 export const fetchChatRooms = createAsyncThunk('chatrooms/fetchChatRooms', async () => {
-  const response = await axios.get('http://localhost:3000/rooms');
+  const response = await axios.get('http://localhost:3001/rooms');
   return response.data;
 });
 

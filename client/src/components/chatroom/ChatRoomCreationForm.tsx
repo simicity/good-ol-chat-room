@@ -26,7 +26,7 @@ const style = {
 }
 
 const createChatRoom = async (chatroom: string, password: string) => {
-  await axios.post('http://localhost:3000/room', {
+  await axios.post('http://localhost:3001/room', {
       "name": chatroom,
       "password": password,
   }, {
@@ -70,6 +70,7 @@ function ChatRoomCreationForm() {
   const isButtonDisabled = chatRoomName === "" || username === "" || isChatRoomNameTaken || isInvalidPassword;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    console.log("handle submit")
     event.preventDefault();
     createChatRoom(chatRoomName, password);
     connect(username);

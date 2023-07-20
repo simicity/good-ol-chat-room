@@ -32,7 +32,7 @@ function ChatRoomDeleteForm() {
 
   const deleteChatRoom = async (chatroom: string, password: string) => {
     try {
-      await axios.delete(`http://localhost:3000/room/delete/${chatroom}/${password}`);
+      await axios.delete(`http://localhost:3001/room/delete/${chatroom}/${password}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if(error.response && error.response.status === 406) {

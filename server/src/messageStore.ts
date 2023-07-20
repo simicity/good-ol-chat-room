@@ -35,6 +35,36 @@ class InMemoryMessageStore extends MessageStore {
   }
 }
 
+import Redis from "ioredis";
+const CONVERSATION_TTL = 24 * 60 * 60;
+
+class RedisMessageStore extends MessageStore {
+  redisClient: Redis;
+
+  constructor(redisClient: Redis) {
+    super();
+    this.redisClient = redisClient;
+  }
+
+  saveMessage(message: messageData) {
+    const value = JSON.stringify(message);
+    this.redisClient
+      .multi()
+      .rpush(`chatroom:${message.to}`, value)
+      .expire(`chatroom:${message.to}`, CONVERSATION_TTL)
+      .exec();
+  }
+
+  findMessagesForChatRoom(chatroom: string) {
+    return this.redisClient
+      .lrange(`chatroom:${chatroom}`, 0, -1)
+      .then((results) => {
+        return results.map((result) => JSON.parse(result));
+      });
+  }
+}
+
 module.exports = {
   InMemoryMessageStore,
+  RedisMessageStore,
 };

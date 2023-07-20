@@ -8,6 +8,11 @@ import db from './db/db';
 
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, messageData, sessionData } from './interfaces';
 
+import Redis from "ioredis";
+const redisClient = new Redis();
+
+const { setupWorker } = require("@socket.io/sticky");
+
 const io = new Server<
   ClientToServerEvents,
   ServerToClientEvents,
@@ -17,6 +22,10 @@ const io = new Server<
   cors: {
     origin: "http://localhost:5173",
   },
+  adapter: require("socket.io-redis")({
+    pubClient: redisClient,
+    subClient: redisClient.duplicate(),
+  }),
 });
 
 app.use(cors());
@@ -220,8 +229,9 @@ app.delete("/room/delete/:chatroom/:password", (req: Request, res: Response) => 
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () =>
   console.log(`server listening at http://localhost:${PORT}`)
 );
+setupWorker(io);
