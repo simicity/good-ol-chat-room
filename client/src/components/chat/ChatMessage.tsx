@@ -5,8 +5,11 @@ import { formatTimeStamp } from '../../utils/formatter';
 
 const style = {
   color: "text.primary",
+  backgroundColor: "background.paper",
   m: 1,
-  borderRadius: '10px',
+  px: 1,
+  py: 0.5,
+  borderRadius: '8px',
 }
 
 const colorPerUserCache = new Map<string, string>();

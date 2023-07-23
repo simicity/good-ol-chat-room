@@ -30,7 +30,7 @@ function ChatMessageArea() {
           return (
             <Box key={index}>
               {showDate && (
-                <Typography variant="caption" component="p" sx={{ textAlign: "center", color:"text.disabled", mb: -1.5 }} >
+                <Typography variant="caption" component="p" sx={{ textAlign: "center", color:"text.disabled", mb: -0.5 }} >
                   {messageMonth}/{messageDate}/{messageYear}
                 </Typography>
               )}
