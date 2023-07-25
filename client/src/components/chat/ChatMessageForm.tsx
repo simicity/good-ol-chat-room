@@ -26,7 +26,7 @@ function ChatMessageForm() {
   const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTextFieldValue(event.target.value);
   };
-  
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const target = event.currentTarget;
@@ -37,6 +37,16 @@ function ChatMessageForm() {
     setTextFieldValue("");
   };
   const isButtonDisabled = textFieldValue === "";
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.shiftKey && event.key === 'Enter') {
+      event.preventDefault(); // Prevents the default Enter behavior (new line)
+      if(textFieldValue) {
+        socket.emit("chatroomMessage", textFieldValue);
+        setTextFieldValue("");
+      }
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -49,6 +59,7 @@ function ChatMessageForm() {
           multiline
           value={textFieldValue}
           onChange={handleTextFieldChange}
+          onKeyDown={handleKeyPress}
           sx={textFieldStyle}
           />
         <Box sx={{ justifyContent: "end" }}>
