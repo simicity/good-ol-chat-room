@@ -65,7 +65,6 @@ const useSocket = () => {
     });
 
     socket.on("userLeft", (message) => {
-      onDisconnect();
       dispatch(addMessage(message));
     });
 
