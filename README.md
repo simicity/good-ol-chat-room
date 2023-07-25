@@ -6,13 +6,13 @@ Online chat rooms are fun! Nowadays, most of the popular communication apps are 
 
 ## Tech Stacks
 
-- Frontend – _React_ (+ _React Router_ + _Redux Toolkit_), _Material UI_, _Socket.IO Client_
-- Backend – _Node.js_ + _Express.js_, _SQLite3_, _Socket.IO_
+- Frontend – _React_, _React Router_, _Redux Toolkit_, _Material UI_, _Socket.IO Client_
+- Backend – _Node.js_, _Express.js_, _Socket.IO_, _Redis_ (Pub/Sub, Database)
 
 ## Key Features
 
 - [Join](https://github.com/simicity/good-ol-chat-room/tree/main/client/public/Screenshot_Join.png) chat rooms by clicking a chat room card and entering a username.
-- Up to 1000 messages are stored in memory on the server and displayed in each chat room.
-- The number of people in each room is shown in each chat room card and kept updated.
+- Messages in the past 24 hours are stored in memory on the server and displayed in each chat room.
+- The number of people in each room is shown and kept updated in real time.
 - [Create](https://github.com/simicity/good-ol-chat-room/tree/main/client/public/Screenshot_Create.png) chat rooms.
 - [Delete](https://github.com/simicity/good-ol-chat-room/tree/main/client/public/Screenshot_Delete.png) chat rooms. (The password set during the chat room creation process is required.)
