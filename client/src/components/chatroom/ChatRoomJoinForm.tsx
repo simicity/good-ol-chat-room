@@ -4,11 +4,11 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import InputBase from '@mui/material/InputBase';
 import FormHelperText from '@mui/material/FormHelperText';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../slices/hooks';
-import { connect } from '../../utils/socketHelper';
-import { connectUser } from '../../slices/user';
+import { setUserData } from '../../slices/user';
+import { joinChatRoom } from '../../utils/socketHelper';
 
 const style = {
   position: 'absolute',
@@ -28,7 +28,7 @@ function ChatRoomJoinForm() {
   const [username, setUsername] = useState("");
   const [isUsernameTaken, setUsernameTaken] = useState(false);
   const usersPerRoom = useAppSelector(state => state.users);
-  const chatroom = useAppSelector(state => state.chatroom);
+  const { chatroom } = useParams();
 
   const handleTextFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedUsername = event.target.value;
@@ -45,8 +45,7 @@ function ChatRoomJoinForm() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    connect(username);
-    dispatch(connectUser(username));
+    localStorage.setItem("username", username);
     navigate('/chatroom/' + chatroom);
   };
 

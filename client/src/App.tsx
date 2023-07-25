@@ -8,7 +8,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import { useSocket } from './utils/socketHelper';
+import { connect, useSocket } from './utils/socketHelper';
 import ChatRoomDeleteForm from './components/chatroom/ChatRoomDeleteForm';
 import { createContext, useMemo, useState } from 'react';
 import ColorMode from './components/ColorMode';
@@ -77,6 +77,7 @@ export default function App() {
     [mode],
   );
 
+  connect();
   useSocket();
 
   return (

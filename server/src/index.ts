@@ -36,34 +36,28 @@ import { Response, Request } from 'express';
 const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
 
-const { InMemorySessionStore } = require("./sessionStore");
-const sessionStore = new InMemorySessionStore();
+const { RedisSessionStore } = require("./sessionStore");
+const sessionStore = new RedisSessionStore(redisClient);
 
-const { InMemoryMessageStore } = require("./messageStore");
-const messageStore = new InMemoryMessageStore();
+const { RedisMessageStore } = require("./messageStore");
+const messageStore = new RedisMessageStore(redisClient);
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
   if (sessionID) {
-    const session = sessionStore.findSession(sessionID);
+    const session = await sessionStore.findSession(sessionID);
     if (session) {
       socket.data.sessionID = sessionID;
       socket.data.userID = session.userID;
-      socket.data.username = session.username;
       return next();
     }
   }
-  const username = socket.handshake.auth.username;
-  if (!username) {
-    return next(new Error("invalid username"));
-  }
   socket.data.sessionID = randomId();
   socket.data.userID = randomId();
-  socket.data.username = username;
   next();
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   // emit session details
   if(!socket.data.sessionID){
     socket.emit("error", "Iinvalid session ID");
@@ -73,19 +67,47 @@ io.on("connection", (socket) => {
     socket.emit("error", "invalid user ID");
     return;
   }
+
   socket.emit("session",
     socket.data.sessionID,
     socket.data.userID,
   );
 
+  // persist session
+  sessionStore.saveSession(socket.data.sessionID, {
+    userID: socket.data.userID,
+    username: undefined,
+    connected: true,
+    chatroom: undefined,
+  });
+
+  const userMap = new Map<string, string[]>();
+  const sessions = await sessionStore.findAllSessions();
+  sessions.forEach((session: sessionData) => {
+    if(session.connected && session.chatroom) {
+      if(userMap.has(session.chatroom)) {
+        userMap.get(session.chatroom)?.push(session.username);
+      } else {
+        userMap.set(session.chatroom, [session.username]);
+      }
+    }
+  });
+  const serializedMap: string = JSON.stringify(Array.from(userMap.entries()));
+  io.emit("users", serializedMap);
+
   // join the chatroom
-  socket.on("joinChatRoom", (chatroom) => {
+  socket.on("joinChatRoom", async (chatroom, username) => {
     if(!chatroom) {
       socket.emit("error", "invalid chatroom");
       return;
     }
+    if(!username) {
+      socket.emit("error", "invalid username");
+      return;
+    }
 
     socket.data.chatroom = chatroom;
+    socket.data.username = username;
     socket.join(chatroom);
 
     // persist session
@@ -96,15 +118,31 @@ io.on("connection", (socket) => {
       chatroom: socket.data.chatroom,
     });
 
+    const userMap = new Map<string, string[]>();
+    const sessions = await sessionStore.findAllSessions();
+    sessions.forEach((session: sessionData) => {
+      if(session.connected && session.chatroom) {
+        if(userMap.has(chatroom)) {
+          userMap.get(chatroom)?.push(username);
+        } else {
+          userMap.set(chatroom, [username]);
+        }
+      }
+    });
+    const serializedMap: string = JSON.stringify(Array.from(userMap.entries()));
+    io.emit("users", serializedMap);
+
     // notify existing users
     if(socket.data.userID && socket.data.username) {
+      const cachedMessages = await messageStore.findMessagesForChatRoom(socket.data.chatroom);
+      socket.emit("chatroomCachedMessages", cachedMessages);
+
       const message: messageData = {
         message: socket.data.username + " joined.",
         from: "",
         to: socket.data.chatroom,
         timestamp: new Date(),
       };
-      socket.emit("chatroomCachedMessages", messageStore.findMessagesForChatRoom(socket.data.chatroom));
       messageStore.saveMessage(message);
       io.to(socket.data.chatroom).emit("userJoined", message);
     }
@@ -134,6 +172,51 @@ io.on("connection", (socket) => {
     messageStore.saveMessage(message);
   });
 
+  socket.on("leaveChatRoom", async (chatroom: string) => {
+    if(!socket.data.userID) {
+      socket.emit("error", "Invalid user ID");
+      return;
+    }
+    socket.leave(chatroom);
+
+    // persist session
+    sessionStore.saveSession(socket.data.sessionID, {
+      userID: socket.data.userID,
+      username: socket.data.username,
+      connected: true,
+      chatroom: undefined,
+    });
+
+    // notify existing users
+    if(socket.data.chatroom && socket.data.username) {
+      const message: messageData = {
+        message: socket.data.username + " left.",
+        from: "",
+        to: socket.data.chatroom,
+        timestamp: new Date(),
+      };
+      messageStore.saveMessage(message);
+      io.to(socket.data.chatroom).emit("userLeft", message);
+
+      const userMap = new Map<string, string[]>();
+      const sessions = await sessionStore.findAllSessions();
+      sessions.forEach((session: sessionData) => {
+        if(session.connected && session.chatroom) {
+          if(userMap.has(session.chatroom)) {
+            const users = userMap.get(session.chatroom)?.filter(user => user !== socket.data.username);
+            if(!users) {
+              userMap.delete(session.chatroom);
+            } else {
+              userMap.set(session.chatroom, users);
+            }
+          }
+        }
+      });
+      const serializedMap: string = JSON.stringify(Array.from(userMap.entries()));
+      io.emit("users", serializedMap);
+    }
+  });
+
   // notify users upon disconnection
   socket.on("disconnect", async () => {
     if(!socket.data.userID) {
@@ -145,6 +228,31 @@ io.on("connection", (socket) => {
     if (isDisconnected) {
       // notify existing users
       if(socket.data.chatroom && socket.data.username) {
+        // update the connection status of the session
+        sessionStore.saveSession(socket.data.sessionID, {
+          userID: socket.data.userID,
+          username: socket.data.username,
+          connected: false,
+          chatroom: undefined,
+        });
+
+        const userMap = new Map<string, string[]>();
+        const sessions = await sessionStore.findAllSessions();
+        sessions.forEach((session: sessionData) => {
+          if(session.connected && session.chatroom) {
+            if(userMap.has(session.chatroom)) {
+              const users = userMap.get(session.chatroom)?.filter(user => user !== socket.data.username);
+              if(!users) {
+                userMap.delete(session.chatroom);
+              } else {
+                userMap.set(session.chatroom, users);
+              }
+            }
+          }
+        });
+        const serializedMap: string = JSON.stringify(Array.from(userMap.entries()));
+        io.emit("users", serializedMap);
+
         const message: messageData = {
           message: socket.data.username + " left.",
           from: "",
@@ -154,34 +262,8 @@ io.on("connection", (socket) => {
         messageStore.saveMessage(message);
         io.to(socket.data.chatroom).emit("userLeft", message);
       }
-      // update the connection status of the session
-      sessionStore.saveSession(socket.data.sessionID, {
-        userID: socket.data.userID,
-        username: socket.data.username,
-        connected: false,
-        chatroom: undefined,
-      });
     }
   });
-});
-
-app.get("/users", (req: Request, res: Response) => {
-  // fetch existing users
-  const usersPerRoom = new Map<string, string[]>;
-  sessionStore.findAllSessions().forEach((session: sessionData) => {
-    if(session.connected && session.chatroom) {
-      if(usersPerRoom.has(session.chatroom)) {
-        usersPerRoom.get(session.chatroom)?.push(session.username);
-      } else {
-        usersPerRoom.set(session.chatroom, [session.username]); 
-      }
-    }
-  });
-  const arr = Array.from(usersPerRoom, ([key, value]) => ({
-    chatroom: key,
-    users: value,
-  }));
-  res.status(200).json(arr);
 });
 
 app.get("/rooms", (req: Request, res: Response) => {

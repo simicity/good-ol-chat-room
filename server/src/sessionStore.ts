@@ -29,8 +29,7 @@ class InMemorySessionStore extends SessionStore {
 
 import Redis from "ioredis";
 const SESSION_TTL = 24 * 60 * 60;
-const mapSession = ([userID, username, connected]: any[]) =>
-  userID ? { userID, username, connected: connected === "true" } : undefined;
+const mapSession = ([userID, username, connected, chatroom]: any[]) => userID ? { userID, username, connected: connected === "true", chatroom: chatroom.length == 0 ? undefined : chatroom } : undefined;
 
 class RedisSessionStore extends SessionStore {
   redisClient: Redis;
@@ -42,11 +41,11 @@ class RedisSessionStore extends SessionStore {
 
   findSession(id: string) {
     return this.redisClient
-      .hmget(`session:${id}`, "userID", "username", "connected")
+      .hmget(`session:${id}`, "userID", "username", "connected", "chatroom")
       .then(mapSession);
   }
 
-  saveSession(id: string, { userID, username, connected }: sessionData) {
+  saveSession(id: string, { userID, username, connected, chatroom }: sessionData) {
     this.redisClient
       .multi()
       .hset(
@@ -56,7 +55,9 @@ class RedisSessionStore extends SessionStore {
         "username",
         username,
         "connected",
-        connected.toString()
+        connected.toString(),
+        "chatroom",
+        chatroom ?? ""
       )
       .expire(`session:${id}`, SESSION_TTL)
       .exec();
@@ -78,7 +79,7 @@ class RedisSessionStore extends SessionStore {
     } while (nextIndex !== 0);
     const commands: any[] = [];
     keys.forEach((key) => {
-      commands.push(["hmget", key, "userID", "username", "connected"]);
+      commands.push(["hmget", key, "userID", "username", "connected", "chatroom"]);
     });
     return this.redisClient
       .multi(commands)

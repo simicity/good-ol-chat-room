@@ -13,6 +13,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Box from '@mui/material/Box';
+import { UsersData } from '../../interfaces';
 
 const options = [
   'Delete',
@@ -86,7 +87,7 @@ function ChatRoomCard({ chatroom }: { chatroom: string }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const usersPerRoom = useAppSelector(state => state.users);
+  const usersInRoom = useAppSelector(state => state.users);
   const [numOfUsers, setNumOfUsers] = useState(0);
 
   const handleClick = () => {
@@ -97,16 +98,17 @@ function ChatRoomCard({ chatroom }: { chatroom: string }) {
   }
 
   useEffect(() => {
-    function updateUsersPerRoom() {
+    function updateUsersInRoom() {
       setNumOfUsers(0);
-      usersPerRoom.forEach((data) => {
+      usersInRoom.forEach((data) => {
         if (data.chatroom === chatroom) {
           setNumOfUsers(data.users.length);
         }
       });
     }
-    updateUsersPerRoom();
-  }, [usersPerRoom]);
+
+    updateUsersInRoom();
+  }, [usersInRoom]);
 
   return (
     <Stack direction={"column"}>

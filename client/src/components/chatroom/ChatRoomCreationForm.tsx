@@ -7,9 +7,8 @@ import FormHelperText from '@mui/material/FormHelperText';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../slices/hooks';
-import { connect } from '../../utils/socketHelper';
 import { setRoom } from '../../slices/chatroom';
-import { connectUser } from '../../slices/user';
+import { setUserData } from '../../slices/user';
 import axios from 'axios';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -70,11 +69,9 @@ function ChatRoomCreationForm() {
   const isButtonDisabled = chatRoomName === "" || username === "" || isChatRoomNameTaken || isInvalidPassword;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    console.log("handle submit")
     event.preventDefault();
     createChatRoom(chatRoomName, password);
-    connect(username);
-    dispatch(connectUser(username));
+    dispatch(setUserData(username));
     dispatch(setRoom(chatRoomName));
     navigate('/chatroom/' + chatRoomName);
   };

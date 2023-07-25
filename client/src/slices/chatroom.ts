@@ -5,7 +5,7 @@ const chatRoomsSlice = createSlice({
   name: 'chatroom',
   initialState: "",
   reducers: {
-    setRoom: (state, action: PayloadAction<string>) => {
+    setRoom: (_, action: PayloadAction<string>) => {
       return action.payload;
     },
     resetRoom: () => {
