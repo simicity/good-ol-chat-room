@@ -21,10 +21,7 @@ const chatRoomsSlice = createSlice({
       state.isLoading = true;
     });
     builder.addCase(fetchChatRooms.fulfilled, (state, action) => {
-      const data = action.payload;
-      if(data) {
-        state.chatrooms = data.map(({chatroom}: {chatroom: string}) => chatroom);
-      }
+      state.chatrooms = action.payload;
       state.isLoading = false;
     });
     builder.addCase(fetchChatRooms.rejected, (state, action) => {

@@ -1,6 +1,6 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useAppDispatch, useAppSelector } from '../slices/hooks';
+import { useAppDispatch } from '../slices/hooks';
 import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import Button from '@mui/material/Button';
 import { leaveChatRoom } from '../utils/socketHelper';

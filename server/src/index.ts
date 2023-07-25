@@ -4,7 +4,6 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 import { Server } from 'socket.io';
-import db from './db/db';
 
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData, messageData, sessionData } from './interfaces';
 
@@ -41,6 +40,9 @@ const sessionStore = new RedisSessionStore(redisClient);
 
 const { RedisMessageStore } = require("./messageStore");
 const messageStore = new RedisMessageStore(redisClient);
+
+const { RedisChatRoomStore } = require("./chatRoomStore");
+const chatRoomStore = new RedisChatRoomStore(redisClient);
 
 io.use(async (socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
@@ -266,49 +268,43 @@ io.on("connection", async (socket) => {
   });
 });
 
-app.get("/rooms", (req: Request, res: Response) => {
-  db.all(`SELECT chatroom FROM chatrooms`, [], (err, rows) => {
-    if (err) {
-      res.status(400).json({"error": err.message});
-      return;
-    }
-    res.status(200).json(rows);
-  });
+app.get("/rooms", async (req: Request, res: Response) => {
+  try {
+    const rooms = await chatRoomStore.findAllRooms();
+    res.status(200).json(rooms);  
+  } catch (err) {
+    res.status(400).json({"error": err});
+  }
 });
 
 app.post("/room", (req: Request, res: Response) => {
-  db.run(`INSERT INTO chatrooms (chatroom, password) VALUES (?,?)`,
-    [req.body.name, req.body.password],
-    (err) => {
-      if (err) {
-        res.status(400).json({ "error": err.message });
-        return;
-      }
-      res.status(201).end();
-    });
+  try {
+    chatRoomStore.saveRoom({roomname: req.body.name, password: req.body.password});
+    res.status(201).end();  
+  } catch (err) {
+    res.status(400).json({ "error": err });
+  }
 });
 
-app.delete("/room/delete/:chatroom/:password", (req: Request, res: Response) => {
-  const chatroom = req.params.chatroom;
+app.delete("/room/delete/:chatroom/:password", async (req: Request, res: Response) => {
+  const roomname = req.params.chatroom;
   const password = req.params.password;
-  db.get(`SELECT password FROM chatrooms WHERE chatroom = ? AND password = ?`, [chatroom, password], (err, row) => {
-    if (err) {
-      res.status(400).json({"error": err.message});
-      return;
-    }
-    if (row == undefined) {
-      res.status(406).json({"error": "Password did not match!"});
-      return;
-    }
-    db.run(`DELETE FROM chatrooms WHERE chatroom = (?)`, [chatroom],
-    (err) => {
-      if (err) {
-        res.status(400).json({ "error": err.message });
-        return;
-      }
-      res.status(200).end();
-    });
-  });
+
+  if(!roomname || !password) {
+    res.status(400).end();
+    return;
+  }
+
+  chatRoomStore.deleteRoom({roomname, password})
+  .then(() => {
+    messageStore.deleteMessagesForChatRoom(roomname);
+  })
+  .then(() => {
+    res.status(200).end();
+  })
+  .catch((err: Error) => {
+    res.status(400).json({ "error": err });
+  })
 });
 
 const PORT = process.env.PORT || 3001;

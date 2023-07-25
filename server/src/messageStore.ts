@@ -50,14 +50,18 @@ class RedisMessageStore extends MessageStore {
     const value = JSON.stringify(message);
     this.redisClient
       .multi()
-      .rpush(`chatroom:${message.to}`, value)
-      .expire(`chatroom:${message.to}`, CONVERSATION_TTL)
+      .rpush(`message:${message.to}`, value)
+      .expire(`message:${message.to}`, CONVERSATION_TTL)
       .exec();
+  }
+
+  deleteMessagesForChatRoom(chatroom: string) {
+    return this.redisClient.del(`message:${chatroom}`);
   }
 
   findMessagesForChatRoom(chatroom: string) {
     return this.redisClient
-      .lrange(`chatroom:${chatroom}`, 0, -1)
+      .lrange(`message:${chatroom}`, 0, -1)
       .then((results) => {
         return results.map((result) => JSON.parse(result));
       });

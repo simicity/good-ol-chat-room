@@ -25,4 +25,4 @@ dist-ssr
 
 .eslintrc.cjs
 build/
-good-ol-chat-room.db
+cluster.js

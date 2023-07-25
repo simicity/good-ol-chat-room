@@ -6,9 +6,7 @@ import InputBase from '@mui/material/InputBase';
 import FormHelperText from '@mui/material/FormHelperText';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../../slices/hooks';
-import { setUserData } from '../../slices/user';
-import { joinChatRoom } from '../../utils/socketHelper';
+import { useAppSelector } from '../../slices/hooks';
 
 const style = {
   position: 'absolute',
@@ -24,7 +22,6 @@ const style = {
 
 function ChatRoomJoinForm() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const [username, setUsername] = useState("");
   const [isUsernameTaken, setUsernameTaken] = useState(false);
   const usersPerRoom = useAppSelector(state => state.users);

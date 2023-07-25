@@ -10,6 +10,8 @@ import axios from 'axios';
 import React from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import { fetchChatRooms } from '../../slices/chatrooms';
+import { useAppDispatch } from '../../slices/hooks';
 
 const style = {
   position: 'absolute',
@@ -29,18 +31,20 @@ function ChatRoomDeleteForm() {
   const [isInvalidPassword, setInvalidPassword] = useState(true);
   const [openToast, setOpenToast] = useState(false);
   const { chatroom } = useParams();
+  const dispatch = useAppDispatch();
 
   const deleteChatRoom = async (chatroom: string, password: string) => {
     try {
       await axios.delete(`http://localhost:3001/room/delete/${chatroom}/${password}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if(error.response && error.response.status === 406) {
+        if(error.response && error.response.status === 400) {
           setOpenToast(true);
         }
       }
       return;
     }
+    dispatch(fetchChatRooms());
     navigate('/lobby');
   }
 

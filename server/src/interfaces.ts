@@ -38,3 +38,8 @@ export interface messageData {
   to: string;
   timestamp: Date;
 }
+
+export interface chatRoomData {
+  roomname: string;
+  password: string;
+}
