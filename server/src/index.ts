@@ -86,7 +86,7 @@ io.on("connection", async (socket) => {
   const userMap = new Map<string, string[]>();
   const sessions = await sessionStore.findAllSessions();
   sessions.forEach((session: sessionData) => {
-    if(session.connected && session.chatroom) {
+    if(session.connected && session.chatroom && session.username) {
       if(userMap.has(session.chatroom)) {
         userMap.get(session.chatroom)?.push(session.username);
       } else {
@@ -123,11 +123,11 @@ io.on("connection", async (socket) => {
     const userMap = new Map<string, string[]>();
     const sessions = await sessionStore.findAllSessions();
     sessions.forEach((session: sessionData) => {
-      if(session.connected && session.chatroom) {
-        if(userMap.has(chatroom)) {
-          userMap.get(chatroom)?.push(username);
+      if(session.connected && session.chatroom && session.username) {
+        if(userMap.has(session.chatroom)) {
+          userMap.get(session.chatroom)?.push(session.username);
         } else {
-          userMap.set(chatroom, [username]);
+          userMap.set(session.chatroom, [session.username]);
         }
       }
     });
@@ -203,14 +203,11 @@ io.on("connection", async (socket) => {
       const userMap = new Map<string, string[]>();
       const sessions = await sessionStore.findAllSessions();
       sessions.forEach((session: sessionData) => {
-        if(session.connected && session.chatroom) {
+        if(session.connected && session.chatroom && session.username) {
           if(userMap.has(session.chatroom)) {
-            const users = userMap.get(session.chatroom)?.filter(user => user !== socket.data.username);
-            if(!users) {
-              userMap.delete(session.chatroom);
-            } else {
-              userMap.set(session.chatroom, users);
-            }
+            userMap.get(session.chatroom)?.push(session.username);
+          } else {
+            userMap.set(session.chatroom, [session.username]);
           }
         }
       });
@@ -241,14 +238,11 @@ io.on("connection", async (socket) => {
         const userMap = new Map<string, string[]>();
         const sessions = await sessionStore.findAllSessions();
         sessions.forEach((session: sessionData) => {
-          if(session.connected && session.chatroom) {
+          if(session.connected && session.chatroom && session.username) {
             if(userMap.has(session.chatroom)) {
-              const users = userMap.get(session.chatroom)?.filter(user => user !== socket.data.username);
-              if(!users) {
-                userMap.delete(session.chatroom);
-              } else {
-                userMap.set(session.chatroom, users);
-              }
+              userMap.get(session.chatroom)?.push(session.username);
+            } else {
+              userMap.set(session.chatroom, [session.username]);
             }
           }
         });
